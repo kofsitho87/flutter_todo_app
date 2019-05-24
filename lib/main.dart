@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bloc/bloc.dart';
@@ -20,10 +21,28 @@ void main() {
   
 
 class MyApp extends StatelessWidget {
+
+  _requestWritePermission() async {
+    PermissionStatus permissionStatus = await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
+    print(permissionStatus);
+    if (permissionStatus == PermissionStatus.authorized) {
+      
+    }
+  }
+
+  @override
+  void initState() {
+    //super.initState();
+    print('initState');
+    //_requestWritePermission();
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     
+    _requestWritePermission();
+
     final authBloc = AuthBloc(
       repository: Repository(
         fileStorage: const FileStorage(

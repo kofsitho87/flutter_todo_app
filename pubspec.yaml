@@ -34,6 +34,7 @@ dependencies:
   flutter_bloc:
   meta:
   path_provider:
+  simple_permissions:
 
 dev_dependencies:
   flutter_test:
