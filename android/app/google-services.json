@@ -8,17 +8,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:880291223630:android:cf83d3261b3a3577",
+        "mobilesdk_app_id": "1:880291223630:android:f5b5406128747ec1",
         "android_client_info": {
-          "package_name": "mytodoapp.study"
+          "package_name": "com.example.flutter_study_app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "880291223630-limgue6g7a4aj6kgqrr8ft2nin06khtc.apps.googleusercontent.com",
+          "client_id": "880291223630-ebd2it58ucp5t1mvgupskpl0n01csqjt.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "mytodoapp.study",
+            "package_name": "com.example.flutter_study_app",
             "certificate_hash": "9d565a23a375bc6b119e82963f7c984f11e57170"
           }
         },
