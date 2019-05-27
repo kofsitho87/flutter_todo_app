@@ -1,64 +1,118 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:simple_permissions/simple_permissions.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:bloc/bloc.dart';
-import './bloc/blocs.dart';
-import './bloc/auth_bloc/bloc.dart';
-import './resources/repository.dart';
-import './resources/file_stroage.dart';
+//import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:path_provider/path_provider.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:bloc/bloc.dart';
+// import './bloc/blocs.dart';
+// import './bloc/auth_bloc/bloc.dart';
+// import './resources/repository.dart';
+// import './resources/file_stroage.dart';
 
-import 'ui/todos.dart';
-import 'ui/detail.dart';
-import 'ui/login.dart';
+// import 'ui/login.dart';
+// import 'ui/main.dart';
 
 void main() {
-  BlocSupervisor.delegate = SimpleBlocDelegate();
+  //BlocSupervisor.delegate = SimpleBlocDelegate();
   runApp(MyApp());
 }
   
 
 class MyApp extends StatelessWidget {
 
-  _requestWritePermission() async {
-    PermissionStatus permissionStatus = await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
-    print(permissionStatus);
-    if (permissionStatus == PermissionStatus.authorized) {
-      
-    }
-  }
-
-  @override
-  void initState() {
-    //super.initState();
-    print('initState');
-    //_requestWritePermission();
-  }
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    
-    _requestWritePermission();
 
-    final authBloc = AuthBloc(
-      repository: Repository(
-        fileStorage: const FileStorage(
-          '__flutter_bloc_app__',
-          getApplicationDocumentsDirectory,
-        )
-      )
+    // final authBloc = AuthBloc(
+    //   repository: Repository(
+    //     fileStorage: const FileStorage(
+    //       '__flutter_bloc_app__',
+    //       getApplicationDocumentsDirectory,
+    //     )
+    //   )
+    // );
+
+    //authBloc.dispatch(CheckAuthEvent());
+
+    // final home = Scaffold(
+    //     body: BlocBuilder(
+    //       bloc: authBloc,
+    //       builder: (BuildContext context, AuthState state) {
+    //         if(state is Autenticated) {
+    //           return MainApp();
+    //         }else if (state is NotAutenticated){
+    //           return LoginApp();
+    //         }else if (state is Autenticating){
+    //           return Center(
+    //             child: CircularProgressIndicator(),
+    //           );
+    //         }
+    //       }
+    //     )
+    //   ),
+    // );
+
+    final home = Scaffold(
+      backgroundColor: Colors.blueGrey,
+      body: ListView.builder(
+        itemCount: 10,
+        itemBuilder: (context, index){
+          var color = Colors.red;
+          if(index == 1 ) color = Colors.green;
+          else if(index == 2) color = Colors.orange;
+
+
+          return Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Container(
+              height: 100,
+              //color: Colors.white,
+              child: Row(
+                children: <Widget>[
+                  Container(
+                    height: 100,
+                    padding: EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(8.0),
+                        bottomLeft: Radius.circular(8.0),
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.indigo,
+                      child: Icon(Icons.work),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                      left: 10
+                    ),
+                    color: Colors.white,
+                    child: Column(
+                      children: <Widget>[
+                        Column(
+                          //textDirection: TextDirection.rtl,
+                          children: <Widget>[
+                            Text("title 123", textAlign: TextAlign.left,),
+                            Text('sub title asdkasjdkj')
+                          ],
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
-
-    // final authBloc = BlocProvider.of<AuthBloc>(context);
-    authBloc.dispatch(CheckAuthEvent());
 
     return MaterialApp(
       // initialRoute: 'Login',
       // routes: {
-      //   'Login': (context) => LoginApp(),
       //   '/todos': (context) => TodoApp(),
       //   '/detail': (context) => DetailApp(),
       // },
@@ -75,33 +129,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.red,
       ),
-      home: Scaffold(
-        body: BlocBuilder(
-          bloc: authBloc,
-          builder: (BuildContext context, AuthState state) {
-            print(state);
-            if(state is Autenticated) {
-              print("user is =>");
-              print(state.user);
-              return Center(
-                child: Text('Autenticated user is => ${state.user.name}'),
-              );
-            }else if (state is NotAutenticated){
-              return Center(
-                child: RaisedButton(
-                  child: Text('NotAutenticated And Login'),
-                  onPressed: (){
-                    authBloc.dispatch(LoginEvent());
-                  },
-                ),
-              );
-            }
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        )
-      ),
+      home: home
     );
   }
 }

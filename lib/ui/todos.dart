@@ -9,6 +9,8 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import '../blocs/todos_bloc.dart';
 import '../models/Todo.dart';
 
+import '../ui/components/components.dart';
+
 class TodoApp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => TodoList();
@@ -241,16 +243,14 @@ class TodoList extends State<TodoApp> {
         ),
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.add),
-            onPressed: _showDialog,
+            icon: new Icon(Icons.filter),
+            //onPressed: _showDialog,
           )
         ],
       ),
       body: StreamBuilder(
         stream: bloc.allTodos,
         builder: (context, AsyncSnapshot<List<Todo>> snapshot) {
-          print("snapshot => ");
-          print(snapshot.hasData);
           if(snapshot.hasData){
             return _buildTodoList(snapshot);
           }else if (snapshot.hasError) {

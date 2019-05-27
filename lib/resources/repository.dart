@@ -38,7 +38,7 @@ class Repository {
     print("api call start and return user model");
     try {
       FirebaseUser user = await _auth.currentUser();
-      if( user != null ){
+      if( user == null ){
         user = await _auth.signInWithEmailAndPassword(email: 's@s.com', password: '123456');  
       }
       final userModel = User(user.uid, user.displayName);

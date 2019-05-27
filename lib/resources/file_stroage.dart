@@ -41,7 +41,6 @@ class FileStorage {
   }
 
   Future<File> saveUser(User user) async{
-    print('save user ...');
     final file = await _getLocalFile();
     return file.writeAsString(JsonEncoder().convert({
       'user': user.toJson(),
@@ -49,7 +48,6 @@ class FileStorage {
   }
 
   Future<File> _getLocalFile() async {
-    print('#########');
     final dir = await getDirectory();
     print(dir);
     return File('${dir.path}/ArchSampleStorage__$tag.json');
