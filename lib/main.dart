@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './ui/colors.dart';
 //import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:path_provider/path_provider.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
@@ -57,21 +58,31 @@ class MyApp extends StatelessWidget {
       body: ListView.builder(
         itemCount: 10,
         itemBuilder: (context, index){
-          var color = Colors.red;
-          if(index == 1 ) color = Colors.green;
-          else if(index == 2) color = Colors.orange;
+          var color = Color1;
+          if(index == 1 ) color = Color2;
+          else if(index == 2) color = Color3;
 
 
           return Padding(
             padding: EdgeInsets.all(10.0),
             child: Container(
-              height: 100,
-              //color: Colors.white,
+              //transform: Matrix4.rotationZ(0.1),
+              //height: 100,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8.0),
+                  bottomLeft: Radius.circular(8.0),
+                ),
+              ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                //verticalDirection: VerticalDirection.up,
+                //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Container(
-                    height: 100,
-                    padding: EdgeInsets.all(20.0),
+                    //height: 100,
+                    padding: EdgeInsets.all(10.0),
                     decoration: BoxDecoration(
                       color: color,
                       borderRadius: BorderRadius.only(
@@ -80,19 +91,20 @@ class MyApp extends StatelessWidget {
                       ),
                     ),
                     child: CircleAvatar(
-                      backgroundColor: Colors.indigo,
-                      child: Icon(Icons.work),
+                      backgroundColor: Color.for,
+                      child: Icon(Icons.work, color: Colors.white),
                     ),
                   ),
                   Container(
-                    alignment: Alignment.center,
+                    //alignment: Alignment.topLeft,
                     padding: EdgeInsets.only(
+                      top: 10,
                       left: 10
                     ),
-                    color: Colors.white,
                     child: Column(
                       children: <Widget>[
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           //textDirection: TextDirection.rtl,
                           children: <Widget>[
                             Text("title 123", textAlign: TextAlign.left,),
