@@ -1,0 +1,143 @@
+DropdownButton(
+    value: category,
+    elevation: 0,
+    underline: null,
+    style: TextStyle(color: Colors.white),
+    //underline: Border.all(1),
+    isExpanded: true,
+    hint: Text('카테고리를 선택해주세요', style: TextStyle(color: Colors.white)),
+    items: categories.map((String value) {
+    return DropdownMenuItem(value: value, child: Text(value, style: TextStyle(color: Colors.black)));
+    }).toList(),
+    onChanged: (value) {
+    print(value);
+    setState(() {
+        category = value;
+    });
+    },
+)
+
+Future<Null> _focusNodeListener() async {
+      if (_focusNode.hasFocus){
+          print('TextField got the focus');
+      } else {
+          print('TextField lost the focus');
+      }
+  }
+  
+  Widget TodoFormUI() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        TextFormField(
+          focusNode: _focusNode,
+          decoration: const InputDecoration(labelText: 'Todo', border: InputBorder.none),
+          keyboardType: TextInputType.text,
+          validator: (String arg) {
+            if (arg.length < 3)
+              return '3글자 이상 입력해주세요!';
+            else
+              return null;
+          },
+          onSaved: (String val) {
+            todo = val;
+          },
+        ),
+        Divider(),
+        DropdownButton(
+          //underline: Border.all(1),
+          isExpanded: true,
+          hint: Text('카테고리를 선택해주세요'),
+          items: ['일', '개인', '공부', '여가'].map((String value) {
+            return DropdownMenuItem(value: value, child: Text(value));
+          }).toList(),
+          onChanged: (_) {},
+        ),
+        MaterialButton(
+          //padding: EdgeInsets.all(0),
+          //textColor: Colors.red,
+          //color: Colors.greenAccent,
+          minWidth: double.infinity,
+          child: Text('완료날짜'),
+          onPressed: _showTimePicker,
+        ),
+        Divider(),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: RaisedButton(
+            child: Text("생성"),
+            onPressed: _validateInputs,
+          ),
+        )
+      ],
+    );
+  }
+
+  void _validateInputs() {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      //addTodo();
+    } else {
+      setState(() {
+        _autoValidate = true;
+      });
+    }
+  }
+
+  void _showDialog() {
+    print('showDialog');
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("할일을 입력해주세요"),
+          content: Form(
+            key: _formKey,
+            autovalidate: _autoValidate,
+            //child: TodoFormUI()
+          ),
+        );
+      }
+    );
+  }
+
+
+  void _settingModalBottomSheet(Todo todo) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return Container(
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                  leading: Icon(Icons.delete),
+                  title: Text('삭제'),
+                  onTap: () {
+                    //Navigator.pushReplacementNamed(context, '/detail')
+                    deleteTodo(todo);
+                    Navigator.of(context, rootNavigator: true).pop();
+                  }
+                ),
+                ListTile(
+                  leading: Icon(Icons.person_pin),
+                  title: Text('Video'),
+                  onTap: () => {},
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+
+  StreamBuilder(
+        stream: bloc.allTodos,
+        builder: (context, AsyncSnapshot<List<Todo>> snapshot) {
+          if(snapshot.hasData){
+            return _buildTodoList(snapshot);
+          }else if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+          }
+          return Center(child: CircularProgressIndicator());
+        },
+      )

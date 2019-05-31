@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_study_app/ui/colors.dart';
 
-Widget TodoRowView(int index, Color color, Color colorDepp, double width) {
+import '../../models/Todo.dart';
+
+Widget TodoRowView(int index, Todo todo) {
   var icon = Icons.work;
-  
-  switch(index){
-    case 1:
+  var color = Color1; 
+  var colorDepp = Color1Deep;
+  switch(todo.category){
+    case "개인":
+      color = Color2;
+      colorDepp = Color2Deep;
       icon = Icons.local_play;
       break;
-    case 2:
+    case "여가":
+      color = Color3;
+      colorDepp = Color3Deep;
       icon = Icons.local_library;
       break;
-    case 3:
+    case "일":
+      //color = Color4;
       icon = Icons.local_library;
       break;
   }
@@ -63,7 +72,7 @@ Widget TodoRowView(int index, Color color, Color colorDepp, double width) {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(index == 0 ? "오늘은 집에서 놀고먹고.. 자고 눕고 하하하하 aslkdlaksdlk laskd sdfl fgkf dfklss" : "타티르",
+              Text(todo.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)

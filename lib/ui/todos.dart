@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'dart:math';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-//import '../bloc/todo_bloc.dart';
-import '../blocs/todos_bloc.dart';
+//import '../blocs/todos_bloc.dart';
+import '../resources/todos_repository.dart';
+import '../bloc/blocs.dart';
 import '../models/Todo.dart';
 
 import '../ui/components/components.dart';
+import './detail.dart';
 
 class TodoApp extends StatefulWidget {
   @override
@@ -17,59 +16,36 @@ class TodoApp extends StatefulWidget {
 }
 
 class TodoList extends State<TodoApp> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  DocumentReference documentReference;
+  TodosBloc todosBloc = TodosBloc(todosRepository: TodosRepository());
 
-
-  TodosBloc bloc = TodosBloc();
-
-  bool isLoading = true;
-  String todo;
-  bool _autoValidate = false;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   final _formKey = GlobalKey<FormState>();
+  //bool isLoading = true;
+  //String todo;
+  //bool _autoValidate = false;
+  //FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
+    todosBloc.dispatch(LoadTodos());
+    //bloc.fetchTodos();
     super.initState();
-
-    bloc.fetchTodos();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    bloc.dispose();
+    //bloc.dispose();
     super.dispose();
   }
 
-  void addTodo() {
-    bloc.addTodo(todo);
-    Navigator.of(context, rootNavigator: true).pop();
-
-    // Map<String, dynamic> data = {
-    //   "title": todo,
-    //   'completed': false,
-    //   'timestamp': DateTime.now()
-    // };
-    // final DocumentReference doc =  documentReference.collection('Todos').document();
-    // doc
-    //   .setData(data)
-    //   .whenComplete(() {
-    //     print('Document Added');
-    //     this.todos.add( Todo(doc.documentID, todo) );
-    //     setState(() {
-    //       todos = this.todos;
-    //     });
-
-    //     Navigator.of(context, rootNavigator: true).pop();
-    //   }).catchError((e) {
-    //     print(e);
-    //   });
+  _goToCreateTodoPage(){
+    //Navigator.pushReplacementNamed(context, '/detail');
+    //Navigator.pushNamed(context, '/detail');
+    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: 'Todo 생성')));
   }
 
   void deleteTodo(Todo todo) {
-    print('deleteTodo');
-    bloc.deleteTodo(todo);
+    todosBloc.dispatch(DeleteTodo(todo));
     //Scaffold.of(context).showSnackBar(SnackBar(content: Text("${todo.title} dismissed")));
     // documentReference
     //     .collection('Todos')
@@ -90,92 +66,7 @@ class TodoList extends State<TodoApp> {
 
   void updateTodo(Todo todo){
     print('updateTodo');
-    bloc.updateTodo(todo);
-  }
-
-  Widget TodoFormUI() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.all(8.0),
-          child: TextFormField(
-            decoration: const InputDecoration(labelText: 'Todo'),
-            keyboardType: TextInputType.text,
-            validator: (String arg) {
-              if (arg.length < 3)
-                return 'Todo must be more than 2 charater';
-              else
-                return null;
-            },
-            onSaved: (String val) {
-              todo = val;
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: RaisedButton(
-            child: Text("Submitß"),
-            onPressed: _validateInputs,
-          ),
-        )
-      ],
-    );
-  }
-
-  void _validateInputs() {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-      addTodo();
-    } else {
-      setState(() {
-        _autoValidate = true;
-      });
-    }
-  }
-
-  void _showDialog() {
-    print('showDialog');
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("할일을 입력해주세요"),
-          content: Form(
-              key: _formKey,
-              autovalidate: _autoValidate,
-              child: TodoFormUI()),
-        );
-      }
-    );
-  }
-
-  void _settingModalBottomSheet(Todo todo) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return Container(
-            child: Wrap(
-              children: <Widget>[
-                ListTile(
-                  leading: Icon(Icons.delete),
-                  title: Text('삭제'),
-                  onTap: () {
-                    //Navigator.pushReplacementNamed(context, '/detail')
-                    deleteTodo(todo);
-                    Navigator.of(context, rootNavigator: true).pop();
-                  }
-                ),
-                ListTile(
-                  leading: Icon(Icons.person_pin),
-                  title: Text('Video'),
-                  onTap: () => {},
-                ),
-              ],
-            ),
-          );
-        });
+    //bloc.updateTodo(todo);
   }
 
   Widget _buildRow(Todo todo) {
@@ -192,19 +83,21 @@ class TodoList extends State<TodoApp> {
       subtitle: Text('subtitle'),
       trailing: Icon(Icons.keyboard_arrow_right),
       onTap: () {
-        _settingModalBottomSheet(todo);
+        //_settingModalBottomSheet(todo);
       },
-      //enabled: false,
-      //selected: true,
-      //dense: true, //small text
     );
   }
 
-  Widget _buildTodoList(AsyncSnapshot<List<Todo>> snapshot) {
-    //print(snapshot.data);
-    return new ListView.builder(
-        //padding: const EdgeInsets.all(20),
-        itemCount: snapshot.data.length,
+  Widget _buildTodoList(List<Todo> todos) {
+    return RefreshIndicator(
+      key: _refreshIndicatorKey,
+      onRefresh: () {
+        todosBloc.dispatch(LoadTodos());
+        _refreshIndicatorKey.currentState.deactivate();
+        return null;
+      },
+      child: ListView.builder(
+        itemCount: todos.length,
         itemBuilder: (context, index) {
           return Dismissible(
             direction: DismissDirection.endToStart,
@@ -220,49 +113,51 @@ class TodoList extends State<TodoApp> {
                 ),
               ),
             ),
-            key: Key(snapshot.data[index].title + Random().nextInt(10000).toString()),
+            key: Key(index.toString()),
             onDismissed: (DismissDirection direction) {
-              final _todo = snapshot.data[index];
+              final _todo = todos[index];
               deleteTodo(_todo);
             },
-            child: Column(
-              children: <Widget>[_buildRow(snapshot.data[index]), Divider()],
-            ),
+            child: TodoRowView(index, todos[index]),
           );
-        });
+        }
+      ),
+    );;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        title: new TextFormField(
-          decoration: new InputDecoration(labelText: "Todo"),
-          validator: (val) => todo = val,
-          //onSaved: (val) => _email = val,
-        ),
-        actions: <Widget>[
-          new IconButton(
-            icon: new Icon(Icons.filter),
-            //onPressed: _showDialog,
-          )
-        ],
+        elevation: 0,
+        bottomOpacity: 0,
+        centerTitle: true,
+        title: Text('MyDashborad'),
+        //backgroundColor: Colors.transparent,
       ),
-      body: StreamBuilder(
-        stream: bloc.allTodos,
-        builder: (context, AsyncSnapshot<List<Todo>> snapshot) {
-          if(snapshot.hasData){
-            return _buildTodoList(snapshot);
-          }else if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
+      body: BlocBuilder(
+        bloc: todosBloc,
+        builder: (BuildContext context, TodosState state) {
+
+          if(state is TodosLoaded){
+            return _buildTodoList(state.todos);
+          }else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
-          return Center(child: CircularProgressIndicator());
-        },
+
+          // return ModalProgressHUD(
+          //   child: child,
+          //   inAsyncCall: state == TodosLoading
+          // );
+        }
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'add todo',
         child: Icon(Icons.add),
-        onPressed: _showDialog,
+        onPressed: _goToCreateTodoPage,
       ),
         //ModalProgressHUD(child: _buildTodoList(), inAsyncCall: isLoading)
     );

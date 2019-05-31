@@ -17,11 +17,8 @@ class Repository {
 
   Repository({@required this.fileStorage});
 
-  final todosApiProvider = TodoApiProvider();
   //final authApiProvidr = AuthApiProvider();
 
-  Future<TodosModel> fetchTodos() => todosApiProvider.fetchTodoList();
-  Future<TodosModel> add() => todosApiProvider.add();
 
   //Future<User> loadUser() => authApiProvidr.loadUser();
   //Future<User> login() => authApiProvidr.login();

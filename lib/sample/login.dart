@@ -114,17 +114,20 @@ class SampleLogin extends StatelessWidget {
   }
 
   Widget _screen(context) {
-    return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          _logoView,
-          SizedBox(height: 100),
-          _loginFormView(),
-          SizedBox(height: 20),
-          _buttonsView(context),
-        ],
+    return SingleChildScrollView(
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(height: 50),
+            _logoView,
+            SizedBox(height: 100),
+            _loginFormView(),
+            SizedBox(height: 20),
+            _buttonsView(context),
+          ],
+        ),
       ),
     );
   }

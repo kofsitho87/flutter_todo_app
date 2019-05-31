@@ -52,6 +52,7 @@ class LoginPageState extends State<LoginApp> {
     var _icon = type == 1 ? Icons.email : Icons.security;
 
     return TextFormField(
+      controller: type == 1 ? emailController : pwController,
       focusNode: focus,
       textInputAction: TextInputAction.next,
       style: TextStyle(color: Colors.white),
@@ -74,14 +75,12 @@ class LoginPageState extends State<LoginApp> {
     );
   }
 
-  Widget _loginFormView(){
+  Widget _loginFormView(LoginFormState state){
     return Form(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: <Widget>[
-            _logoView,
-            SizedBox(height: 50,),
             Container(
               padding: EdgeInsets.only(left: 10.0),
               decoration: BoxDecoration(
@@ -107,7 +106,8 @@ class LoginPageState extends State<LoginApp> {
               padding: EdgeInsets.all(16),
               //height: 50,
               color: Colors.white,
-              onPressed: () => Navigator.of(context).pushNamed('/signin'),
+              //onPressed: () => Navigator.of(context).pushNamed('/signin'),
+              onPressed: state.isFormValid ? siginInAction : null,
               child: Text('Sign in', 
                 style: TextStyle(
                   fontSize: 20
@@ -130,7 +130,6 @@ class LoginPageState extends State<LoginApp> {
                 )
               ),
             ),
-            SizedBox(height: 100),
           ],
         ),
       ),
@@ -195,15 +194,17 @@ class LoginPageState extends State<LoginApp> {
     return BlocBuilder(
       bloc: _loginFormBloc,
       builder: (BuildContext context, LoginFormState state) {
-        return Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              //_logoView,
-              //SizedBox(height: 50),
-              _loginFormView(),
-            ],
+        return SingleChildScrollView(
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _logoView,
+                SizedBox(height: 50),
+                _loginFormView(state),
+              ],
+            ),
           ),
         );
         // return Form(
@@ -274,6 +275,7 @@ class LoginPageState extends State<LoginApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(49, 58, 67, 1),
+      //backgroundColor: Colors.blueGrey[800],
       body: Center(
         child: ModalProgressHUD(
           child: blocBuilder(),

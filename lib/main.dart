@@ -9,11 +9,10 @@ import './bloc/blocs.dart';
 import './resources/repository.dart';
 import './resources/file_stroage.dart';
 
+
 import 'ui/login.dart';
-// import 'ui/main.dart';
-
-
-import './sample/index.dart';
+import 'ui/todos.dart';
+import 'ui/detail.dart';
 
 void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
@@ -36,21 +35,35 @@ class Main extends StatelessWidget {
     authBloc.dispatch(CheckAuthEvent());
 
     return MaterialApp(
+      initialRoute: 'Login',
+      routes: {
+        '/Login': (context) => LoginApp(),
+        '/todos': (context) => TodoApp(),
+        //'/detail': (context) => DetailApp(),
+      },
+      title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        //primarySwatch: ColorWhite,
+        //brightness: Brightness.dark,
+        primaryColor: Colors.blueGrey[800],
+        accentColor: Colors.lightGreen,
+        // textTheme: TextTheme(
+        //   headline: TextStyle(color: Colors.white),
+        //   title: TextStyle(color: Colors.white),
+        // ),
+        primaryTextTheme: TextTheme(
+          title: TextStyle(color: Colors.white),
+          headline: TextStyle(color: Colors.white),
+        )
       ),
-      darkTheme: ThemeData.dark(),
+      //darkTheme: ThemeData.dark(),
       home: Scaffold(
         body: BlocBuilder(
           bloc: authBloc,
           builder: (BuildContext context, AuthState state) {
-            
             if(state is Autenticated) {
-              print("user is =>");
               print(state.user);
-              return Center(
-                child: Text('Autenticated user is => ${state.user.name}'),
-              );
+              return TodoApp();
             }else if (state is NotAutenticated){
               return LoginApp();
             }
