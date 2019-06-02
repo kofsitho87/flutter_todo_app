@@ -231,7 +231,7 @@ class _DetailApp extends State<DetailApp> {
             ),
             body: _formView,
           ),
-          inAsyncCall: state == AddTodo,
+          inAsyncCall: state != TodosLoaded,
         );
       }
     );

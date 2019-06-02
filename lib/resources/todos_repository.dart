@@ -40,6 +40,22 @@ class TodosRepository {
 
     return result;
   }
+
+  Future<bool> deleteTodo(Todo todo) async {
+    var result = false;
+    await Firestore.instance.collection("USERS").document(_user.uid)
+        .collection('Todos')
+        .document(todo.id)
+        .delete()
+        .whenComplete(() {
+          result = true;
+          print('deleted'); 
+        }
+    ).catchError((e) {
+      print(e);
+    });
+    return result;
+  }
   
   Future saveTodos(List<Todo> todos) {
     // Map<String, dynamic> data = {

@@ -91,9 +91,11 @@ class TodoList extends State<TodoApp> {
   Widget _buildTodoList(List<Todo> todos) {
     return RefreshIndicator(
       key: _refreshIndicatorKey,
-      onRefresh: () {
+      onRefresh: () async {
+        _refreshIndicatorKey.currentState.show();
         todosBloc.dispatch(LoadTodos());
-        _refreshIndicatorKey.currentState.deactivate();
+        //await Future.delayed(Duration(seconds: 1));
+        //_refreshIndicatorKey.currentState.deactivate();
         return null;
       },
       child: ListView.builder(
