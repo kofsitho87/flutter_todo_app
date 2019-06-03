@@ -63,6 +63,22 @@ class TodosRepository {
     });
     return result;
   }
+
+  Future<bool> updateTodo(Todo todo) async {
+    var result = false;
+    await Firestore.instance.collection("USERS").document(_user.uid)
+        .collection('Todos')
+        .document(todo.id)
+        .updateData(todo.toMap())
+        .whenComplete(() {
+          result = true;
+          print('updated');
+        })
+    .catchError((e) {
+      print(e);
+    });
+    return result;
+  }
   
   Future saveTodos(List<Todo> todos) {
     // Map<String, dynamic> data = {

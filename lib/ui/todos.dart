@@ -42,7 +42,6 @@ class TodoList extends State<TodoApp> {
   }
 
   _goToCreateTodoPage(){
-    //Navigator.pushReplacementNamed(context, '/detail');
     Navigator.pushNamed(context, Routes.addTodo);
     //Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: 'Todo 생성')));
   }
@@ -99,6 +98,11 @@ class TodoList extends State<TodoApp> {
     );
   }
 
+  Future<bool> _confirmDismissAction(direction) async {
+    print(direction);
+    return direction == DismissDirection.endToStart;
+  }
+
   Widget _buildRow(Todo todo) {
     return ListTile(
       //leading: Icon(Icons.work, size: 40.0, color: Colors.red),
@@ -130,25 +134,41 @@ class TodoList extends State<TodoApp> {
         itemCount: todos.length,
         itemBuilder: (context, index) {
           return Dismissible(
-            direction: DismissDirection.endToStart,
+            confirmDismiss: _confirmDismissAction,
+            //direction: DismissDirection.endToStart,
             background: Container(
+              margin: EdgeInsets.symmetric(vertical: 5),
+              padding: EdgeInsets.only(left: 20.0),
+              color: Colors.blue,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Icon(Icons.delete, color: Colors.white) //Text('Delete',textAlign: TextAlign.left,style: TextStyle(color: Colors.white)),
+              ),
+            ),
+            secondaryBackground: Container(
+              margin: EdgeInsets.symmetric(vertical: 5),
               padding: EdgeInsets.only(right: 20.0),
               color: Colors.red,
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Text(
-                  'Delete',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(color: Colors.white),
-                ),
+                child: Icon(Icons.delete, color: Colors.white) //Text('Delete',textAlign: TextAlign.left,style: TextStyle(color: Colors.white)),
               ),
             ),
             key: Key(index.toString()),
             onDismissed: (DismissDirection direction) {
               final _todo = todos[index];
-              deleteTodo(_todo);
+              if(direction == DismissDirection.endToStart){
+                deleteTodo(_todo);
+              }
             },
-            child: TodoRowView(index, todos[index]),
+            child: GestureDetector(
+              child: TodoRowView(index, todos[index]),
+              onTapUp: (_) {
+                print('on Tap up');
+                final todo = todos[index];
+                Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: todo.title, todo: todo)));
+              },
+            ),
           );
         }
       ),

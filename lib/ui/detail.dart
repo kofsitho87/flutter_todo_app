@@ -9,7 +9,8 @@ import '../models/Todo.dart';
 
 class DetailApp extends StatefulWidget {
   final String title;
-  DetailApp({@required this.title});
+  Todo todo;
+  DetailApp({@required this.title, this.todo});
 
   @override
   State<StatefulWidget> createState() => _DetailApp(title: title);
@@ -30,9 +31,12 @@ class _DetailApp extends State<DetailApp> {
 
   @override
   void initState() {
-    
     todosBloc = BlocProvider.of<TodosBloc>(context);
-
+    if(widget.todo != null){
+      todoTitleController.text = widget.todo.title;
+      _completeDate = widget.todo.completeDate;
+      _category = widget.todo.category;
+    }
     super.initState();
   }
 
@@ -50,7 +54,7 @@ class _DetailApp extends State<DetailApp> {
   void _showTimePicker(){
     DatePicker.showDatePicker(context, 
       showTitleActions: true,
-      currentTime: DateTime.now(),
+      currentTime: _completeDate == null ? DateTime.now() : _completeDate,
       theme: DatePickerTheme(
         //backgroundColor: Theme.of(context).primaryColor
       ),
@@ -78,7 +82,21 @@ class _DetailApp extends State<DetailApp> {
       Scaffold.of(context).showSnackBar(snackBar);
       return;
     }
-    this.addTodo(todoTitleController.text, _category, _completeDate);
+    var completeDate = null;
+    if(_completeDate != null){
+      completeDate = _completeDate.add(Duration(hours: 23, minutes: 59, seconds: 59));
+    }
+    this.addTodo(todoTitleController.text, _category, completeDate);
+  }
+
+  void _updateTodoAction(){
+    var completeDate = null;
+    if(_completeDate != null){
+      completeDate = _completeDate.add(Duration(hours: 23, minutes: 59, seconds: 59));
+    }
+    final todo = Todo(todoTitleController.text, _category, completeDate: completeDate);
+    todosBloc.dispatch(UpdateTodo(todo));
+    
   }
 
   Widget get _todoTitleRow {
@@ -216,12 +234,12 @@ class _DetailApp extends State<DetailApp> {
               ],
             ),
             MaterialButton(
-              padding: EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.symmetric(vertical: 12),
               minWidth: double.infinity,
               color: Theme.of(context).accentColor,
               textColor: Colors.white,
-              child: Text('생성'),
-              onPressed: _saveTodoAction,
+              child: Text(widget.todo == null ? '생성' : '업데이트', style: TextStyle(fontSize: 20)),
+              onPressed: widget.todo == null ? _saveTodoAction : _updateTodoAction,
             ),
           ],
         ),
