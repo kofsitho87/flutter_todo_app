@@ -7,6 +7,11 @@ abstract class AuthEvent extends Equatable {
 }
 
 class LoginEvent extends AuthEvent {
+  final String email;
+  final String password;
+
+  LoginEvent(@required this.email, @required this.password) : super([email, password]);
+
   @override
   String toString() => 'LoginEvent';
 }

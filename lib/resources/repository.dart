@@ -31,12 +31,12 @@ class Repository {
     }
   }
 
-  Future<User> login() async {
+  Future<User> login(email, password) async {
     print("api call start and return user model");
     try {
       FirebaseUser user = await _auth.currentUser();
       if( user == null ){
-        user = await _auth.signInWithEmailAndPassword(email: 's@s.com', password: '123456');  
+        user = await _auth.signInWithEmailAndPassword(email: email, password: password);  
       }
       final userModel = User(user.uid, user.displayName);
       var a= this.saveUser(userModel);

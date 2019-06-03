@@ -20,18 +20,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async* {
     
     if (event is LoginEvent) {
-      yield* _LoginAction();
+      yield* _LoginAction(event.email, event.password);
     }
     else if (event is CheckAuthEvent) {
       yield* _CheckAuthAction();
     }
   }
 
-  Stream<AuthState> _LoginAction() async* {
+  Stream<AuthState> _LoginAction(String email, String password) async* {
     try {
       yield Autenticating();
 
-      final user = await this.repository.login();
+      final user = await this.repository.login(email, password);
       yield Autenticated(user: user);
     } catch (e) {
       yield NotAutenticated(error: e.toString());

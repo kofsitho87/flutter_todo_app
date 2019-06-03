@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter_study_app/ui/home.dart';
 import 'package:path_provider/path_provider.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,8 +12,7 @@ import './resources/file_stroage.dart';
 
 
 import 'ui/login.dart';
-import 'ui/todos.dart';
-import 'ui/detail.dart';
+import 'ui/home.dart';
 
 void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
@@ -31,48 +31,34 @@ class Main extends StatelessWidget {
       )
     );
 
-    // final authBloc = BlocProvider.of<AuthBloc>(context);
     authBloc.dispatch(CheckAuthEvent());
 
     return MaterialApp(
-      initialRoute: 'Login',
-      routes: {
-        '/Login': (context) => LoginApp(),
-        '/todos': (context) => TodoApp(),
-        //'/detail': (context) => DetailApp(),
-      },
       title: 'Flutter Demo',
       theme: ThemeData(
-        //primarySwatch: ColorWhite,
-        //brightness: Brightness.dark,
         primaryColor: Colors.blueGrey[800],
         accentColor: Colors.lightGreen,
-        // textTheme: TextTheme(
-        //   headline: TextStyle(color: Colors.white),
-        //   title: TextStyle(color: Colors.white),
-        // ),
         primaryTextTheme: TextTheme(
           title: TextStyle(color: Colors.white),
           headline: TextStyle(color: Colors.white),
         )
       ),
-      //darkTheme: ThemeData.dark(),
       home: Scaffold(
         body: BlocBuilder(
           bloc: authBloc,
           builder: (BuildContext context, AuthState state) {
             if(state is Autenticated) {
               print(state.user);
-              return TodoApp();
+              return HomeApp(authBloc: authBloc);
             }else if (state is NotAutenticated){
-              return LoginApp();
+              return LoginApp(authBloc: authBloc);
             }
             return Center(
               child: CircularProgressIndicator(),
             );
           },
-        ),
-      ),
+        )
+      )
     );
   }
 }

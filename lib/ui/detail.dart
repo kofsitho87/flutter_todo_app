@@ -20,7 +20,7 @@ class _DetailApp extends State<DetailApp> {
   final String title;
   _DetailApp({@required this.title});
 
-  TodosBloc todosBloc = TodosBloc(todosRepository: TodosRepository());
+  TodosBloc todosBloc;
 
   //String _todoTitle;
   DateTime _completeDate;
@@ -29,9 +29,23 @@ class _DetailApp extends State<DetailApp> {
 
   final todoTitleController = TextEditingController();
 
+  @override
+  void initState() {
+    
+    todosBloc = BlocProvider.of<TodosBloc>(context);
+
+    super.initState();
+  }
+
   void addTodo(String title, String category, DateTime completeDate) async {
     final todo = Todo(title, category, completeDate: completeDate);
-    todosBloc.dispatch(AddTodo(todo));
+    final result = await todosBloc.dispatch(AddTodo(todo));
+    //print(result);
+    setState(() {
+      todoTitleController.text = '';
+      _category = null;
+      _completeDate = null;
+    });
   }
 
   void _showTimePicker(){
@@ -85,8 +99,8 @@ class _DetailApp extends State<DetailApp> {
           border: InputBorder.none,
         ),
         validator: (String arg) {
-          if (arg.length < 3)
-            return '3글자 이상 입력해주세요!';
+          if (arg.length < 1)
+            return '1글자 이상 입력해주세요!';
           else
             return null;
         },
@@ -216,6 +230,7 @@ class _DetailApp extends State<DetailApp> {
 
   @override
   Widget build(BuildContext context) {
+    //return Center(child: Text('aa'));
 
     return BlocBuilder(
       bloc: todosBloc,
@@ -229,9 +244,11 @@ class _DetailApp extends State<DetailApp> {
               centerTitle: true,
               title: Text(title),
             ),
-            body: _formView,
+            body: SingleChildScrollView(
+              child: _formView,
+            ),
           ),
-          inAsyncCall: state != TodosLoaded,
+          inAsyncCall: !(state is TodosLoaded),
         );
       }
     );

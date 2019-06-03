@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-//import '../blocs/todos_bloc.dart';
-import '../resources/todos_repository.dart';
+import '../routes/index.dart';
 import '../bloc/blocs.dart';
 import '../models/Todo.dart';
 
@@ -16,10 +15,11 @@ class TodoApp extends StatefulWidget {
 }
 
 class TodoList extends State<TodoApp> {
-  TodosBloc todosBloc = TodosBloc(todosRepository: TodosRepository());
+  
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   final _formKey = GlobalKey<FormState>();
+  TodosBloc todosBloc;
   //bool isLoading = true;
   //String todo;
   //bool _autoValidate = false;
@@ -27,8 +27,7 @@ class TodoList extends State<TodoApp> {
 
   @override
   void initState() {
-    todosBloc.dispatch(LoadTodos());
-    //bloc.fetchTodos();
+    todosBloc = BlocProvider.of<TodosBloc>(context);
     super.initState();
   }
 
@@ -40,8 +39,8 @@ class TodoList extends State<TodoApp> {
 
   _goToCreateTodoPage(){
     //Navigator.pushReplacementNamed(context, '/detail');
-    //Navigator.pushNamed(context, '/detail');
-    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: 'Todo 생성')));
+    Navigator.pushNamed(context, Routes.addTodo);
+    //Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: 'Todo 생성')));
   }
 
   void deleteTodo(Todo todo) {
@@ -93,9 +92,7 @@ class TodoList extends State<TodoApp> {
       key: _refreshIndicatorKey,
       onRefresh: () async {
         _refreshIndicatorKey.currentState.show();
-        todosBloc.dispatch(LoadTodos());
-        //await Future.delayed(Duration(seconds: 1));
-        //_refreshIndicatorKey.currentState.deactivate();
+        //todosBloc.dispatch(LoadTodos());
         return null;
       },
       child: ListView.builder(
@@ -136,7 +133,12 @@ class TodoList extends State<TodoApp> {
         bottomOpacity: 0,
         centerTitle: true,
         title: Text('MyDashborad'),
-        //backgroundColor: Colors.transparent,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.all_out),
+            onPressed: () {},
+          )
+        ],
       ),
       body: BlocBuilder(
         bloc: todosBloc,
@@ -161,7 +163,6 @@ class TodoList extends State<TodoApp> {
         child: Icon(Icons.add),
         onPressed: _goToCreateTodoPage,
       ),
-        //ModalProgressHUD(child: _buildTodoList(), inAsyncCall: isLoading)
     );
   }
 }

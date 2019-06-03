@@ -9,6 +9,10 @@ import '../bloc/login_form_bloc/bloc.dart';
 import '../bloc/auth_bloc/bloc.dart';
 
 class LoginApp extends StatefulWidget {
+  final AuthBloc authBloc;
+
+  LoginApp({@required this.authBloc});
+
   @override
   State<StatefulWidget> createState() => LoginPageState();
 }
@@ -28,6 +32,7 @@ class LoginPageState extends State<LoginApp> {
 
   @override
   void initState(){
+    
     emailController.addListener(_onEmailChanged);
   }
 
@@ -168,17 +173,18 @@ class LoginPageState extends State<LoginApp> {
     setState(() {
       isLoading = true;
     });
-    _handleSignIn(emailController.text, pwController.text)
-      .then((FirebaseUser user) {
-        // setState(() {
-        //   isLoading = false;
-        // });
-        print(user.email);
-        goToMainPage();
-      })
-      .catchError((e) {
-        print(e);
-      });  
+    widget.authBloc.dispatch(LoginEvent(emailController.text, pwController.text));
+    // _handleSignIn(emailController.text, pwController.text)
+    //   .then((FirebaseUser user) {
+    //     // setState(() {
+    //     //   isLoading = false;
+    //     // });
+    //     //print(user.email);
+    //     //goToMainPage();
+    //   })
+    //   .catchError((e) {
+    //     print(e);
+    //   });  
   }
 
   void _onEmailChanged(){
@@ -207,72 +213,38 @@ class LoginPageState extends State<LoginApp> {
             ),
           ),
         );
-        // return Form(
-        //   child: Padding(
-        //     padding: const EdgeInsets.all(36.0),
-        //     child: Column(
-        //       crossAxisAlignment: CrossAxisAlignment.center,
-        //       mainAxisAlignment: MainAxisAlignment.center,
-        //       children: <Widget>[
-        //         //SizedBox(height: 10.0),
-        //         TextFormField(
-        //           controller: emailController,
-        //           keyboardType: TextInputType.emailAddress,
-        //           autovalidate: true,
-        //           validator: (_){
-        //             return state.isEmailValid ? null : '올바른 이메일을 입력해주세요';
-        //           },
-        //           decoration: InputDecoration(
-        //             icon: Icon(Icons.email),
-        //             labelText: 'email',
-        //             hintText: "Email",
-        //             //border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
-        //           ),
-        //         ),
-        //         SizedBox(height: 25.0),
-        //         TextFormField(
-        //           controller: pwController,
-        //           obscureText: true,
-        //           autovalidate: true,
-        //           validator: (_){
-        //             return state.isPasswordValid ? null : '올바른 비밀번호를 입력해주세요';
-        //           },
-        //           decoration: InputDecoration(
-        //             icon: Icon(Icons.lock),
-        //             labelText: 'Password',
-        //             hintText: "Password",
-        //           )
-        //         ),
-        //         SizedBox(
-        //           height: 35.0,
-        //         ),
-        //         Material(
-        //           elevation: 5.0,
-        //           borderRadius: BorderRadius.circular(30.0),
-        //           color: Colors.red,
-        //           child: MaterialButton(
-        //             minWidth: MediaQuery.of(context).size.width,
-        //             onPressed: state.isFormValid ? siginInAction : null,
-        //             child: Text("Login",
-        //                 textAlign: TextAlign.center,
-        //                 style: style.copyWith(
-        //                   color: Colors.white, fontWeight: FontWeight.bold)
-        //                 ),
-        //           ),
-        //         ),
-        //         SizedBox(
-        //           height: 15.0,
-        //         ),
-        //       ],
-        //     ),
-        //   ),
-        // );
       }
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    // return MaterialApp(
+    //   theme: ThemeData(
+    //     //primarySwatch: ColorWhite,
+    //     //brightness: Brightness.dark,
+    //     primaryColor: Colors.blueGrey[800],
+    //     accentColor: Colors.lightGreen,
+    //     // textTheme: TextTheme(
+    //     //   headline: TextStyle(color: Colors.white),
+    //     //   title: TextStyle(color: Colors.white),
+    //     // ),
+    //     primaryTextTheme: TextTheme(
+    //       title: TextStyle(color: Colors.white),
+    //       headline: TextStyle(color: Colors.white),
+    //     ),
+    //   ),
+    //   home: Scaffold(
+    //     backgroundColor: Color.fromRGBO(49, 58, 67, 1),
+    //     body: Center(
+    //       child: ModalProgressHUD(
+    //         child: blocBuilder(),
+    //         inAsyncCall: isLoading
+    //       )
+    //     ),
+    //   ),
+    // );
+
     return Scaffold(
       backgroundColor: Color.fromRGBO(49, 58, 67, 1),
       //backgroundColor: Colors.blueGrey[800],
