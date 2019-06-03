@@ -94,9 +94,9 @@ class _DetailApp extends State<DetailApp> {
     if(_completeDate != null){
       completeDate = _completeDate.add(Duration(hours: 23, minutes: 59, seconds: 59));
     }
-    final todo = Todo(todoTitleController.text, _category, completeDate: completeDate);
+    final todo = Todo(todoTitleController.text, _category, completeDate: completeDate, id: widget.todo.id);
     todosBloc.dispatch(UpdateTodo(todo));
-    
+    Navigator.of(context).pop();
   }
 
   Widget get _todoTitleRow {
@@ -213,6 +213,25 @@ class _DetailApp extends State<DetailApp> {
     );
   }
 
+  Widget get _completeRowView {
+    return Container(
+      decoration: BoxDecoration(
+        color: Color.fromRGBO(45, 58, 66, 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      margin: EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Icon(Icons.check_box, color: Colors.white),
+          SizedBox(width: 20),
+          Text('완료하기', style: TextStyle(fontSize: 16, color: Colors.white)),
+        ],
+      )
+    );
+  }
+
   Widget get _formView {
     return Form(
       child: Padding(
@@ -231,6 +250,7 @@ class _DetailApp extends State<DetailApp> {
                 _todoTitleRow,
                 _completeDateRow,
                 _categoryRow,
+                widget.todo != null ? _completeRowView : Container(),
               ],
             ),
             MaterialButton(
