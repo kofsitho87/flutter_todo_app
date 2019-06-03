@@ -10,6 +10,10 @@ import '../ui/components/components.dart';
 import './detail.dart';
 
 class TodoApp extends StatefulWidget {
+  final void Function() onSignOut;
+
+  TodoApp({@required this.onSignOut});
+
   @override
   State<StatefulWidget> createState() => TodoList();
 }
