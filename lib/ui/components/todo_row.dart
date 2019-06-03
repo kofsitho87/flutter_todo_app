@@ -24,6 +24,13 @@ Widget TodoRowView(int index, Todo todo) {
       break;
   }
 
+  var remainingDays = '기한없음';
+  var monthDateString = '';
+  if( todo.completeDate != null ){
+    final inDays = todo.completeDate.difference(DateTime.now()).inDays;
+    remainingDays = inDays == 0 ? 'Today' : inDays.toString() + '일 남음';
+    monthDateString = todo.completeDate.month.toString() + '월 ' + todo.completeDate.day.toString() + '일';
+  }
   final leftSide = Container(
     height: 100,
     width: 80,
@@ -46,14 +53,14 @@ Widget TodoRowView(int index, Todo todo) {
           height: 10,
         ),
         Text(
-          'Today',
-          style: TextStyle(color: Colors.white),
+          remainingDays,
+          style: TextStyle(color: Colors.white, fontSize: 12),
         ),
         SizedBox(
           height: 5,
         ),
         Text(
-          '5월 29일',
+          monthDateString,
           style: TextStyle(color: Colors.white, fontSize: 10.0),
         )
       ],
@@ -79,7 +86,7 @@ Widget TodoRowView(int index, Todo todo) {
               ),
               SizedBox(height: 5),
               Text(
-                '집 -> 한강까지 왕복',
+                'completed Date ${todo.completeDate != null ? todo.completeDate.year : null}',
                 style: TextStyle(color: Colors.grey),
               )
             ],
@@ -89,7 +96,7 @@ Widget TodoRowView(int index, Todo todo) {
               Icon(Icons.local_offer, color: color, size: 16),
               SizedBox(width: 5,),
               Text(
-                '공부, 일, 여가, 모임, 재미, 휴식',
+                todo.category,
                 style: TextStyle(color: Colors.grey),
               ),
             ],

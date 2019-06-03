@@ -32,7 +32,6 @@ class Repository {
   }
 
   Future<User> login(email, password) async {
-    print("api call start and return user model");
     try {
       FirebaseUser user = await _auth.currentUser();
       if( user == null ){
@@ -44,6 +43,16 @@ class Repository {
         print(file.toString());
       });
       return userModel;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<bool> signOut() async {
+    try {
+      _auth.signOut();
+      await fileStorage.clean();
+      return true;
     } catch (e) {
       throw e;
     }

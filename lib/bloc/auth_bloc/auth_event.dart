@@ -16,6 +16,11 @@ class LoginEvent extends AuthEvent {
   String toString() => 'LoginEvent';
 }
 
+class SignOutEvent extends AuthEvent {
+  @override
+  String toString() => 'SignOutEvent';
+}
+
 class CheckAuthEvent extends AuthEvent {
   @override
   String toString() => 'CheckAuthEvent';

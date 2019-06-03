@@ -72,6 +72,33 @@ class TodoList extends State<TodoApp> {
     //bloc.updateTodo(todo);
   }
 
+  void _showDialog(){
+    showDialog(
+      context: context,
+      builder: (BuildContext context){
+        return AlertDialog(
+          title: Text('로그아웃 하시겠습니까?'),
+          content: Text('content'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('확인'),
+              onPressed: (){
+                widget.onSignOut();
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('닫기'),
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      }
+    );
+  }
+
   Widget _buildRow(Todo todo) {
     return ListTile(
       //leading: Icon(Icons.work, size: 40.0, color: Colors.red),
@@ -139,8 +166,8 @@ class TodoList extends State<TodoApp> {
         title: Text('MyDashborad'),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.all_out),
-            onPressed: () {},
+            icon: Icon(Icons.network_wifi),
+            onPressed: _showDialog,
           )
         ],
       ),

@@ -42,7 +42,9 @@ class _HomeApp extends State<HomeApp> {
         ),
         routes: {
           Routes.todos: (context) {
-            return TodoApp();
+            return TodoApp(onSignOut: () {
+              widget.authBloc.dispatch(SignOutEvent());
+            });
           },
           Routes.addTodo: (context) {
             return DetailApp(title: 'Add Todo');

@@ -33,32 +33,16 @@ class Main extends StatelessWidget {
 
     authBloc.dispatch(CheckAuthEvent());
 
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primaryColor: Colors.blueGrey[800],
-        accentColor: Colors.lightGreen,
-        primaryTextTheme: TextTheme(
-          title: TextStyle(color: Colors.white),
-          headline: TextStyle(color: Colors.white),
-        )
-      ),
-      home: Scaffold(
-        body: BlocBuilder(
-          bloc: authBloc,
-          builder: (BuildContext context, AuthState state) {
-            if(state is Autenticated) {
-              print(state.user);
-              return HomeApp(authBloc: authBloc);
-            }else if (state is NotAutenticated){
-              return LoginApp(authBloc: authBloc);
-            }
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          },
-        )
-      )
+    return BlocBuilder(
+      bloc: authBloc,
+      builder: (BuildContext context, AuthState state) {
+        if(state is Autenticated) {
+          //print(state.user);
+          return HomeApp(authBloc: authBloc);
+        }
+
+        return LoginApp(authBloc: authBloc);
+      },
     );
   }
 }

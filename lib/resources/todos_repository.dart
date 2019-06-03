@@ -17,7 +17,14 @@ class TodosRepository {
 
     _documentReference = Firestore.instance.collection("USERS").document(_user.uid);
     QuerySnapshot querySnapshot = await _documentReference.collection('Todos').getDocuments();
-    final _todos = querySnapshot.documents.map((snapshot) => Todo(snapshot['title'], snapshot['category'], id: snapshot.documentID)).toList();
+    final _todos = querySnapshot.documents.map((snapshot) {
+      return Todo(
+        snapshot['title'], 
+        snapshot['category'], 
+        id: snapshot.documentID, 
+        completeDate: snapshot['completeDate'] is Timestamp ? (snapshot['completeDate'] as Timestamp).toDate() : null
+      );
+    }).toList();
     print("todos => ");
     print(_todos);
     return _todos;

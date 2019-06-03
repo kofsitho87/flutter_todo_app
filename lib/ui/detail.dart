@@ -4,7 +4,6 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../resources/todos_repository.dart';
 import '../bloc/todo_bloc/bloc.dart';
 import '../models/Todo.dart';
 
@@ -39,13 +38,13 @@ class _DetailApp extends State<DetailApp> {
 
   void addTodo(String title, String category, DateTime completeDate) async {
     final todo = Todo(title, category, completeDate: completeDate);
-    final result = await todosBloc.dispatch(AddTodo(todo));
-    //print(result);
-    setState(() {
-      todoTitleController.text = '';
-      _category = null;
-      _completeDate = null;
-    });
+    await todosBloc.dispatch(AddTodo(todo));
+    Navigator.of(context).pop();
+    // setState(() {
+    //   todoTitleController.text = '';
+    //   _category = null;
+    //   _completeDate = null;
+    // });
   }
 
   void _showTimePicker(){
@@ -70,11 +69,13 @@ class _DetailApp extends State<DetailApp> {
   }
 
   void _saveTodoAction(){
-    if( todoTitleController.text.length < 3 ){
-      //final snackBar = SnackBar(content: Text('Are you talkin\' to me?'));
-      //Scaffold.of(context).showSnackBar(snackBar);
+    if( todoTitleController.text.length < 1 ){
+      final snackBar = SnackBar(content: Text('할일을 입력해주세요!!'));
+      Scaffold.of(context).showSnackBar(snackBar);
       return;
     }else if ( _category == null ){
+      final snackBar = SnackBar(content: Text('카테고리를 선택해주세요!!'));
+      Scaffold.of(context).showSnackBar(snackBar);
       return;
     }
     this.addTodo(todoTitleController.text, _category, _completeDate);
@@ -230,8 +231,6 @@ class _DetailApp extends State<DetailApp> {
 
   @override
   Widget build(BuildContext context) {
-    //return Center(child: Text('aa'));
-
     return BlocBuilder(
       bloc: todosBloc,
       builder: (BuildContext context, TodosState state) {
@@ -244,9 +243,7 @@ class _DetailApp extends State<DetailApp> {
               centerTitle: true,
               title: Text(title),
             ),
-            body: SingleChildScrollView(
-              child: _formView,
-            ),
+            body: _formView,
           ),
           inAsyncCall: !(state is TodosLoaded),
         );

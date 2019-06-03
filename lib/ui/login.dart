@@ -26,13 +26,8 @@ class LoginPageState extends State<LoginApp> {
   final emailController = TextEditingController(text: 's@s.com');
   final pwController = TextEditingController(text: '123456');
 
-  bool isLoading = false;
-
-  TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
-
   @override
   void initState(){
-    
     emailController.addListener(_onEmailChanged);
   }
 
@@ -158,9 +153,6 @@ class LoginPageState extends State<LoginApp> {
   }
 
   void signUpAction(){
-    setState(() {
-      isLoading = true;
-    });
     _handleSignUp(emailController.text, pwController.text)
       .then((FirebaseUser user) {
         print(user);
@@ -170,25 +162,10 @@ class LoginPageState extends State<LoginApp> {
   }
 
   void siginInAction(){
-    setState(() {
-      isLoading = true;
-    });
     widget.authBloc.dispatch(LoginEvent(emailController.text, pwController.text));
-    // _handleSignIn(emailController.text, pwController.text)
-    //   .then((FirebaseUser user) {
-    //     // setState(() {
-    //     //   isLoading = false;
-    //     // });
-    //     //print(user.email);
-    //     //goToMainPage();
-    //   })
-    //   .catchError((e) {
-    //     print(e);
-    //   });  
   }
 
   void _onEmailChanged(){
-    //_myFormBloc.dispatch(EmailChanged(email: _emailController.text));
     _loginFormBloc.dispatch(EmailChanged(email: emailController.text));
   }
 
@@ -219,40 +196,23 @@ class LoginPageState extends State<LoginApp> {
 
   @override
   Widget build(BuildContext context) {
-    // return MaterialApp(
-    //   theme: ThemeData(
-    //     //primarySwatch: ColorWhite,
-    //     //brightness: Brightness.dark,
-    //     primaryColor: Colors.blueGrey[800],
-    //     accentColor: Colors.lightGreen,
-    //     // textTheme: TextTheme(
-    //     //   headline: TextStyle(color: Colors.white),
-    //     //   title: TextStyle(color: Colors.white),
-    //     // ),
-    //     primaryTextTheme: TextTheme(
-    //       title: TextStyle(color: Colors.white),
-    //       headline: TextStyle(color: Colors.white),
-    //     ),
-    //   ),
-    //   home: Scaffold(
-    //     backgroundColor: Color.fromRGBO(49, 58, 67, 1),
-    //     body: Center(
-    //       child: ModalProgressHUD(
-    //         child: blocBuilder(),
-    //         inAsyncCall: isLoading
-    //       )
-    //     ),
-    //   ),
-    // );
-
-    return Scaffold(
-      backgroundColor: Color.fromRGBO(49, 58, 67, 1),
-      //backgroundColor: Colors.blueGrey[800],
-      body: Center(
-        child: ModalProgressHUD(
-          child: blocBuilder(),
-          inAsyncCall: isLoading
-        )
+    return MaterialApp(
+      theme: ThemeData(
+        primaryColor: Colors.blueGrey[800],
+        accentColor: Colors.lightGreen,
+        primaryTextTheme: TextTheme(
+          title: TextStyle(color: Colors.white),
+          headline: TextStyle(color: Colors.white),
+        ),
+      ),
+      home: Scaffold(
+        backgroundColor: Color.fromRGBO(49, 58, 67, 1),
+        body: Center(
+          child: ModalProgressHUD(
+            child: blocBuilder(),
+            inAsyncCall: widget.authBloc.currentState is Autenticating
+          )
+        ),
       ),
     );
   }

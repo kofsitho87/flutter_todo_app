@@ -24,6 +24,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
     else if (event is CheckAuthEvent) {
       yield* _CheckAuthAction();
+    }else if (event is SignOutEvent) {
+      yield* _SignOutAction();
     }
   }
 
@@ -43,6 +45,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield Autenticating();
       final user = await this.repository.loadUser();
       yield Autenticated(user: user);
+    } catch (e) {
+      yield NotAutenticated(error: e.toString());
+    }
+  }
+
+  Stream<AuthState> _SignOutAction() async* {
+    try {
+      yield Autenticating();
+      final result = await this.repository.signOut();
+      yield NotAutenticated(error: 'SignOut');
     } catch (e) {
       yield NotAutenticated(error: e.toString());
     }
