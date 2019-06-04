@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../models/Todo.dart';
+import '../../models/models.dart';
+
+
 
 @immutable
 abstract class TodosState extends Equatable {
@@ -14,9 +16,10 @@ class TodosLoading extends TodosState {
 }
 
 class TodosLoaded extends TodosState {
+  final SortingFilter activeFilter;
   final List<Todo> todos;
 
-  TodosLoaded([this.todos = const []]) : super([todos]);
+  TodosLoaded([this.todos = const [], this.activeFilter]) : super([todos, activeFilter]);
 
   @override
   String toString() => 'TodosLoaded { todos: $todos }';

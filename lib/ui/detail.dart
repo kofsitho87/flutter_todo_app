@@ -94,7 +94,11 @@ class _DetailApp extends State<DetailApp> {
     if(_completeDate != null){
       completeDate = _completeDate.add(Duration(hours: 23, minutes: 59, seconds: 59));
     }
-    final todo = Todo(todoTitleController.text, _category, completeDate: completeDate, id: widget.todo.id);
+    final todo = Todo(todoTitleController.text, _category, 
+      completeDate: completeDate, 
+      id: widget.todo.id, 
+      createdDate: widget.todo.createdDate
+    );
     todosBloc.dispatch(UpdateTodo(todo));
     Navigator.of(context).pop();
   }
@@ -250,7 +254,6 @@ class _DetailApp extends State<DetailApp> {
                 _todoTitleRow,
                 _completeDateRow,
                 _categoryRow,
-                widget.todo != null ? _completeRowView : Container(),
               ],
             ),
             MaterialButton(
@@ -281,7 +284,9 @@ class _DetailApp extends State<DetailApp> {
               centerTitle: true,
               title: Text(title),
             ),
-            body: _formView,
+            body: SingleChildScrollView(
+              child: _formView,
+            ),
           ),
           inAsyncCall: !(state is TodosLoaded),
         );

@@ -22,7 +22,10 @@ class TodosRepository {
         snapshot['title'], 
         snapshot['category'], 
         id: snapshot.documentID, 
-        completeDate: snapshot['completeDate'] is Timestamp ? (snapshot['completeDate'] as Timestamp).toDate() : null
+        completeDate: snapshot['completeDate'] is Timestamp ? (snapshot['completeDate'] as Timestamp).toDate() : null,
+        completed: snapshot['completed'],
+        note: snapshot['note'],
+        createdDate: (snapshot['createdDate'] as Timestamp).toDate()
       );
     }).toList();
     print("todos => ");

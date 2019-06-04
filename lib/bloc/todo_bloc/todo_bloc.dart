@@ -3,7 +3,7 @@ import 'package:bloc/bloc.dart';
 import './bloc.dart';
 
 import '../../resources/todos_repository.dart';
-import '../../models/Todo.dart';
+import '../../models/models.dart';
 
 class TodosBloc extends Bloc<TodosEvent, TodosState> {
   final TodosRepository todosRepository;
@@ -28,7 +28,7 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
       yield* _mapToggleAllToState();
     } else if (event is ClearCompleted) {
       yield* _mapClearCompletedToState();
-    }
+    } 
   }
 
   Stream<TodosState> _mapLoadTodosToState() async* {

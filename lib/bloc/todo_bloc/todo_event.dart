@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../models/Todo.dart';
+import '../../models/models.dart';
 
 @immutable
 abstract class TodosEvent extends Equatable {

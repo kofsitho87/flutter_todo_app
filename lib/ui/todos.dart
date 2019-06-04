@@ -1,77 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../routes/index.dart';
 import '../bloc/blocs.dart';
-import '../models/Todo.dart';
+import '../models/models.dart';
 
 import '../ui/components/components.dart';
 import './detail.dart';
 
-class TodoApp extends StatefulWidget {
+class TodoApp extends StatelessWidget {
   final void Function() onSignOut;
+  TodoApp({@required this.onSignOut, Key key}) : super(key: key);
 
-  TodoApp({@required this.onSignOut});
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
-  @override
-  State<StatefulWidget> createState() => TodoList();
-}
-
-class TodoList extends State<TodoApp> {
-  
-
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  final _formKey = GlobalKey<FormState>();
   TodosBloc todosBloc;
-  //bool isLoading = true;
-  //String todo;
-  //bool _autoValidate = false;
-  //FocusNode _focusNode = FocusNode();
+  FilteredTodosBloc filteredTodosBloc;
 
-  @override
-  void initState() {
-    todosBloc = BlocProvider.of<TodosBloc>(context);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    //bloc.dispose();
-    super.dispose();
-  }
-
-  _goToCreateTodoPage(){
-    Navigator.pushNamed(context, Routes.addTodo);
-    //Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: 'Todo 생성')));
+  void toggleCompleteTodo(Todo todo){
+    todo.completed = !todo.completed;
+    todosBloc.dispatch(UpdateTodo(todo));
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("${todo.title} ${!todo.completed ? '미' : ''}완료됨")));
   }
 
   void deleteTodo(Todo todo) {
     todosBloc.dispatch(DeleteTodo(todo));
-    //Scaffold.of(context).showSnackBar(SnackBar(content: Text("${todo.title} dismissed")));
-    // documentReference
-    //     .collection('Todos')
-    //     .document(todo.id)
-    //     .delete()
-    //     .whenComplete(() {
-    //       print('deleted');
-    //       print(todo);
-    //       if (todos.contains(todo)) {
-    //         setState(() {
-    //           todos.remove(todo);
-    //         });
-    //       }
-    //       //Scaffold.of(context).showSnackBar(SnackBar(content: Text("${todo.title} dismissed")));
-    //     }
-    // );
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("${todo.title} dismissed")));
   }
 
-  void updateTodo(Todo todo){
-    print('updateTodo');
-    //bloc.updateTodo(todo);
-  }
-
-  void _showDialog(){
+  void _showLogoutDialog(context){
     showDialog(
       context: context,
       builder: (BuildContext context){
@@ -82,7 +40,7 @@ class TodoList extends State<TodoApp> {
             FlatButton(
               child: Text('확인'),
               onPressed: (){
-                widget.onSignOut();
+                onSignOut();
                 Navigator.of(context).pop();
               },
             ),
@@ -98,86 +56,120 @@ class TodoList extends State<TodoApp> {
     );
   }
 
-  Future<bool> _confirmDismissAction(direction) async {
-    print(direction);
-    return direction == DismissDirection.endToStart;
-  }
-
-  Widget _buildRow(Todo todo) {
-    return ListTile(
-      //leading: Icon(Icons.work, size: 40.0, color: Colors.red),
-      leading: new Checkbox(
-        value: todo.completed, 
-        onChanged: (completed) {
-          todo.completed = completed;
-          updateTodo(todo);
-        },
-      ),
-      title: Text(todo.title),
-      subtitle: Text('subtitle'),
-      trailing: Icon(Icons.keyboard_arrow_right),
-      onTap: () {
-        //_settingModalBottomSheet(todo);
-      },
+  void _showTodoBottomSheet(Todo todo, context){
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.check_circle),
+                title: Text( todo.completed ? '미완료하기' : '완료하기' ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  toggleCompleteTodo(todo);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.navigate_next),
+                title: Text('수정하기'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: todo.title, todo: todo)));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete),
+                title: Text('삭제하기'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  deleteTodo(todo);
+                },
+              )
+            ],
+          ),
+        );
+      }
     );
   }
 
-  Widget _buildTodoList(List<Todo> todos) {
-    return RefreshIndicator(
-      key: _refreshIndicatorKey,
-      onRefresh: () async {
-        _refreshIndicatorKey.currentState.show();
-        //todosBloc.dispatch(LoadTodos());
-        return null;
-      },
-      child: ListView.builder(
-        itemCount: todos.length,
-        itemBuilder: (context, index) {
-          return Dismissible(
-            confirmDismiss: _confirmDismissAction,
-            //direction: DismissDirection.endToStart,
-            background: Container(
-              margin: EdgeInsets.symmetric(vertical: 5),
-              padding: EdgeInsets.only(left: 20.0),
-              color: Colors.blue,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Icon(Icons.delete, color: Colors.white) //Text('Delete',textAlign: TextAlign.left,style: TextStyle(color: Colors.white)),
+  void _showFilterListBottomSheet(context){
+    final enabled = (filteredTodosBloc.currentState is FilteredTodosLoaded) ? 
+      (todosBloc.currentState as TodosLoaded).todos.length > 1 : 
+      false;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                enabled: enabled,
+                title: Text('전체보기'),
+                onTap: () {
+                  filteredTodosBloc.dispatch(SortingTodos(SortingFilter.basic));
+                  Navigator.of(context).pop();
+                },
               ),
-            ),
-            secondaryBackground: Container(
-              margin: EdgeInsets.symmetric(vertical: 5),
-              padding: EdgeInsets.only(right: 20.0),
-              color: Colors.red,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Icon(Icons.delete, color: Colors.white) //Text('Delete',textAlign: TextAlign.left,style: TextStyle(color: Colors.white)),
+              ListTile(
+                enabled: enabled,
+                title: Text('미완료만 보기'),
+                onTap: () {
+                  filteredTodosBloc.dispatch(VisibilityTodos(VisibilityFilter.active));
+                  Navigator.of(context).pop();
+                },
               ),
-            ),
-            key: Key(index.toString()),
-            onDismissed: (DismissDirection direction) {
-              final _todo = todos[index];
-              if(direction == DismissDirection.endToStart){
-                deleteTodo(_todo);
-              }
-            },
-            child: GestureDetector(
-              child: TodoRowView(index, todos[index]),
-              onTapUp: (_) {
-                print('on Tap up');
-                final todo = todos[index];
-                Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: todo.title, todo: todo)));
-              },
-            ),
-          );
-        }
-      ),
-    );;
+              ListTile(
+                enabled: enabled,
+                title: Text('완료만 보기'),
+                onTap: () {
+                  filteredTodosBloc.dispatch(VisibilityTodos(VisibilityFilter.completed));
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                enabled: enabled,
+                //leading: Icon(Icons.filter_hdr),
+                title: Text('완료 시간순으로 정렬'),
+                onTap: () {
+                  filteredTodosBloc.dispatch(SortingTodos(SortingFilter.completeDate));
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                enabled: enabled,
+                //leading: Icon(Icons.navigate_next),
+                title: Text('미완료/완료로 정렬'),
+                onTap: () {
+                  filteredTodosBloc.dispatch(SortingTodos(SortingFilter.activeCompleted));
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          ),
+        );
+      }
+    );
+  }
+
+  Future<bool> _confirmDismissAction(direction) async {
+    return false;
+    return direction == DismissDirection.endToStart;
   }
 
   @override
   Widget build(BuildContext context) {
+
+    todosBloc = BlocProvider.of<TodosBloc>(context);
+    
+    filteredTodosBloc = FilteredTodosBloc(
+      todosBloc: todosBloc
+    );
+
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         elevation: 0,
@@ -186,33 +178,83 @@ class TodoList extends State<TodoApp> {
         title: Text('MyDashborad'),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.network_wifi),
-            onPressed: _showDialog,
-          )
+            icon: Icon(Icons.filter_list),
+            onPressed: () => _showFilterListBottomSheet(context),
+          ),
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: () => _showLogoutDialog(context),
+          ),
         ],
-      ),
-      body: BlocBuilder(
-        bloc: todosBloc,
-        builder: (BuildContext context, TodosState state) {
-
-          if(state is TodosLoaded){
-            return _buildTodoList(state.todos);
-          }else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          // return ModalProgressHUD(
-          //   child: child,
-          //   inAsyncCall: state == TodosLoading
-          // );
-        }
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'add todo',
         child: Icon(Icons.add),
-        onPressed: _goToCreateTodoPage,
+        onPressed: () {
+          Navigator.pushNamed(context, Routes.addTodo);
+        },
+      ),
+      body: BlocBuilder(
+        bloc: filteredTodosBloc,
+        builder: (BuildContext context, FilteredTodosState state) {
+          if(state is FilteredTodosLoaded) {
+            final todos = state.filteredTodos;
+
+            return RefreshIndicator(
+              key: _refreshIndicatorKey,
+              onRefresh: () async {
+                _refreshIndicatorKey.currentState.show();
+                todosBloc.dispatch(LoadTodos());
+                return null;
+              },
+              child: ListView.builder(
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  final todo = todos[index];
+                  return Dismissible(
+                    key: Key(index.toString()),
+                    confirmDismiss: _confirmDismissAction,
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      padding: EdgeInsets.only(left: 20.0),
+                      color: Colors.blue,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Icon(Icons.delete, color: Colors.white)
+                      ),
+                    ),
+                    secondaryBackground: Container(
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      padding: EdgeInsets.only(right: 20.0),
+                      color: Colors.red,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Icon(Icons.delete, color: Colors.white)
+                      ),
+                    ),
+                    onDismissed: (DismissDirection direction) {
+                      if(direction == DismissDirection.endToStart){
+                        deleteTodo(todo);
+                      }
+                    },
+                    child: GestureDetector(
+                      child: AnimatedOpacity(
+                        key: Key(index.toString()),
+                        opacity: todo.completed ? 0.4 : 1,
+                        duration: Duration(milliseconds: 0),
+                        child: TodoRowView(index, todo),
+                      ),
+                      onTapUp: (_) => _showTodoBottomSheet(todo, context),
+                    ),
+                  );
+                }
+              ),
+            );
+          }
+
+          return Center(child: CircularProgressIndicator());
+        }
       ),
     );
   }
