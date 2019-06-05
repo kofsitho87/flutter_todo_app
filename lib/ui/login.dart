@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
@@ -108,7 +107,7 @@ class LoginPageState extends State<LoginApp> {
               color: Colors.white,
               //onPressed: () => Navigator.of(context).pushNamed('/signin'),
               onPressed: state.isFormValid ? siginInAction : null,
-              child: Text('Sign in', 
+              child: Text('로그인', 
                 style: TextStyle(
                   fontSize: 20
                 )
@@ -123,7 +122,7 @@ class LoginPageState extends State<LoginApp> {
               //height: 50,
               color: Colors.lightGreen,
               onPressed: () => {},
-              child: Text('Sign up', 
+              child: Text('회원가입', 
                 style: TextStyle(
                   fontSize: 20,
                   color: Colors.white

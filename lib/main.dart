@@ -10,7 +10,7 @@ import './bloc/blocs.dart';
 import './resources/repository.dart';
 import './resources/file_stroage.dart';
 
-
+import 'ui/signup.dart';
 import 'ui/login.dart';
 import 'ui/home.dart';
 
@@ -39,9 +39,11 @@ class Main extends StatelessWidget {
         if(state is Autenticated) {
           //print(state.user);
           return HomeApp(authBloc: authBloc);
+        }else if (state is NotAutenticated){
+          return SignupApp(authBloc: authBloc);
+          return LoginApp(authBloc: authBloc);
         }
-
-        return LoginApp(authBloc: authBloc);
+        return Center(child: CircularProgressIndicator());
       },
     );
   }

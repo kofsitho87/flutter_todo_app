@@ -4,10 +4,15 @@ import 'package:flutter_study_app/ui/colors.dart';
 import '../../models/Todo.dart';
 
 Widget TodoRowView(int index, Todo todo) {
-  var icon = Icons.work;
-  var color = Color1; 
-  var colorDepp = Color1Deep;
+  var icon;
+  var color;
+  var colorDepp;
   switch(todo.category){
+    case "공부":
+      color = Color1; 
+      colorDepp = Color1Deep;
+      icon = Icons.book;
+      break;
     case "개인":
       color = Color2;
       colorDepp = Color2Deep;
@@ -16,11 +21,12 @@ Widget TodoRowView(int index, Todo todo) {
     case "여가":
       color = Color3;
       colorDepp = Color3Deep;
-      icon = Icons.local_library;
+      icon = Icons.refresh;
       break;
     case "일":
-      //color = Color4;
-      icon = Icons.local_library;
+      color = Color4; 
+      colorDepp = Color4Deep;
+      icon = Icons.work;
       break;
   }
 
@@ -86,7 +92,9 @@ Widget TodoRowView(int index, Todo todo) {
               ),
               SizedBox(height: 5),
               Text(
-                'completed Date ${todo.completeDate != null ? todo.completeDate.year : null}',
+                todo.note,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: Colors.grey),
               )
             ],
@@ -106,13 +114,12 @@ Widget TodoRowView(int index, Todo todo) {
     ),
   );
 
-  var checked = false;
-
-  final rightSide = Center(
-    child: Checkbox(
-      value: checked,
-    ),
-  );
+  //var checked = false;
+  // final rightSide = Center(
+  //   child: Checkbox(
+  //     value: checked,
+  //   ),
+  // );
 
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),

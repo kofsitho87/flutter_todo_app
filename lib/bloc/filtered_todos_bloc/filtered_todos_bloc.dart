@@ -22,7 +22,7 @@ class FilteredTodosBloc extends Bloc<FilteredTodosEvent, FilteredTodosState> {
   @override
   FilteredTodosState get initialState {
     if( todosBloc.currentState is TodosLoaded ){
-      return FilteredTodosLoaded((todosBloc.currentState as TodosLoaded).todos, VisibilityFilter.active);
+      return FilteredTodosLoaded((todosBloc.currentState as TodosLoaded).todos, VisibilityFilter.all);
     }
     return FilteredTodosLoading();
   }
@@ -63,6 +63,8 @@ class FilteredTodosBloc extends Bloc<FilteredTodosEvent, FilteredTodosState> {
     final visibilityFilter = currentState is FilteredTodosLoaded 
       ? (currentState as FilteredTodosLoaded).activeFilter
       : VisibilityFilter.all;
+    
+    print('visibilityFilter : $visibilityFilter');
 
     yield FilteredTodosLoading();
 

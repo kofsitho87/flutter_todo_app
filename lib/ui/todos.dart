@@ -21,12 +21,14 @@ class TodoApp extends StatelessWidget {
   void toggleCompleteTodo(Todo todo){
     todo.completed = !todo.completed;
     todosBloc.dispatch(UpdateTodo(todo));
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("${todo.title} ${!todo.completed ? '미' : ''}완료됨")));
+    final sn = SnackBar(content: Text("${todo.title} ${!todo.completed ? '미' : ''}완료됨"), duration: Duration(milliseconds: 200));
+    _scaffoldKey.currentState.showSnackBar(sn);
   }
 
   void deleteTodo(Todo todo) {
     todosBloc.dispatch(DeleteTodo(todo));
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("${todo.title} dismissed")));
+    final sn = SnackBar(content: Text("${todo.title} dismissed"), duration: Duration(milliseconds: 200));
+    _scaffoldKey.currentState.showSnackBar(sn);
   }
 
   void _showLogoutDialog(context){
@@ -35,7 +37,7 @@ class TodoApp extends StatelessWidget {
       builder: (BuildContext context){
         return AlertDialog(
           title: Text('로그아웃 하시겠습니까?'),
-          content: Text('content'),
+          //content: Text('content'),
           actions: <Widget>[
             FlatButton(
               child: Text('확인'),
@@ -76,7 +78,9 @@ class TodoApp extends StatelessWidget {
                 title: Text('수정하기'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: todo.title, todo: todo)));
+                  final page = DetailPageRoute(title: todo.title, todo: todo);
+                  Navigator.of(context).push(page);
+                  //Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => DetailApp(title: todo.title, todo: todo)));
                 },
               ),
               ListTile(
@@ -211,43 +215,55 @@ class TodoApp extends StatelessWidget {
                 itemCount: todos.length,
                 itemBuilder: (context, index) {
                   final todo = todos[index];
-                  return Dismissible(
-                    key: Key(index.toString()),
-                    confirmDismiss: _confirmDismissAction,
-                    direction: DismissDirection.endToStart,
-                    background: Container(
-                      margin: EdgeInsets.symmetric(vertical: 5),
-                      padding: EdgeInsets.only(left: 20.0),
-                      color: Colors.blue,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Icon(Icons.delete, color: Colors.white)
-                      ),
+
+                  return GestureDetector(
+                    child: AnimatedOpacity(
+                      key: Key(index.toString()),
+                      opacity: todo.completed ? 0.4 : 1,
+                      duration: Duration(milliseconds: 200),
+                      child: TodoRowView(index, todo),
                     ),
-                    secondaryBackground: Container(
-                      margin: EdgeInsets.symmetric(vertical: 5),
-                      padding: EdgeInsets.only(right: 20.0),
-                      color: Colors.red,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Icon(Icons.delete, color: Colors.white)
-                      ),
-                    ),
-                    onDismissed: (DismissDirection direction) {
-                      if(direction == DismissDirection.endToStart){
-                        deleteTodo(todo);
-                      }
-                    },
-                    child: GestureDetector(
-                      child: AnimatedOpacity(
-                        key: Key(index.toString()),
-                        opacity: todo.completed ? 0.4 : 1,
-                        duration: Duration(milliseconds: 0),
-                        child: TodoRowView(index, todo),
-                      ),
-                      onTapUp: (_) => _showTodoBottomSheet(todo, context),
-                    ),
+                    onTapUp: (_) => _showTodoBottomSheet(todo, context),
                   );
+
+                  // return Dismissible(
+                  //   key: Key(index.toString()),
+                  //   confirmDismiss: _confirmDismissAction,
+                  //   direction: DismissDirection.endToStart,
+                  //   background: Container(
+                  //     margin: EdgeInsets.symmetric(vertical: 5),
+                  //     padding: EdgeInsets.only(left: 20.0),
+                  //     color: Colors.blue,
+                  //     child: Align(
+                  //       alignment: Alignment.centerLeft,
+                  //       child: Icon(Icons.delete, color: Colors.white)
+                  //     ),
+                  //   ),
+                  //   secondaryBackground: Container(
+                  //     margin: EdgeInsets.symmetric(vertical: 5),
+                  //     padding: EdgeInsets.only(right: 20.0),
+                  //     color: Colors.red,
+                  //     child: Align(
+                  //       alignment: Alignment.centerRight,
+                  //       child: Icon(Icons.delete, color: Colors.white)
+                  //     ),
+                  //   ),
+                  //   onDismissed: (DismissDirection direction) {
+                  //     if(direction == DismissDirection.endToStart){
+                  //       deleteTodo(todo);
+                  //     }
+                  //   },
+                  //   child: GestureDetector(
+                  //     child: AnimatedOpacity(
+                  //       key: Key(index.toString()),
+                  //       opacity: todo.completed ? 0.4 : 1,
+                  //       duration: Duration(milliseconds: 200),
+                  //       child: TodoRowView(index, todo),
+                  //     ),
+                  //     onTapUp: (_) => _showTodoBottomSheet(todo, context),
+                  //   ),
+                  // );
+                  
                 }
               ),
             );

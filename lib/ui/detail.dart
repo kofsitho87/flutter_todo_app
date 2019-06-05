@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -6,6 +7,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/todo_bloc/bloc.dart';
 import '../models/Todo.dart';
+
+class DetailPageRoute extends CupertinoPageRoute {
+  final String title;
+  Todo todo;
+
+  DetailPageRoute({@required this.title, this.todo})
+      : super(builder: (BuildContext context) => DetailApp(title: title, todo: todo));
+
+
+  // OPTIONAL IF YOU WISH TO HAVE SOME EXTRA ANIMATION WHILE ROUTING
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    return FadeTransition(opacity: animation, child: DetailApp(title: title, todo: todo));
+  }
+}
 
 class DetailApp extends StatefulWidget {
   final String title;
@@ -28,6 +45,7 @@ class _DetailApp extends State<DetailApp> {
   final categories = ['일', '개인', '공부', '여가'];
 
   final todoTitleController = TextEditingController();
+  final noteConttroller = TextEditingController();
 
   @override
   void initState() {
@@ -36,6 +54,7 @@ class _DetailApp extends State<DetailApp> {
       todoTitleController.text = widget.todo.title;
       _completeDate = widget.todo.completeDate;
       _category = widget.todo.category;
+      noteConttroller.text = widget.todo.note;
     }
     super.initState();
   }
@@ -90,15 +109,14 @@ class _DetailApp extends State<DetailApp> {
   }
 
   void _updateTodoAction(){
-    var completeDate = null;
-    if(_completeDate != null){
-      completeDate = _completeDate.add(Duration(hours: 23, minutes: 59, seconds: 59));
-    }
     final todo = Todo(todoTitleController.text, _category, 
-      completeDate: completeDate, 
+      completeDate: _completeDate == null ? null : _completeDate.add(Duration(hours: 23, minutes: 59, seconds: 59)), 
       id: widget.todo.id, 
-      createdDate: widget.todo.createdDate
+      createdDate: widget.todo.createdDate,
+      completed: widget.todo.completed,
+      note: noteConttroller.text,
     );
+    
     todosBloc.dispatch(UpdateTodo(todo));
     Navigator.of(context).pop();
   }
@@ -236,6 +254,32 @@ class _DetailApp extends State<DetailApp> {
     );
   }
 
+  Widget get _noteRowView {
+    return Container(
+      decoration: BoxDecoration(
+        color: Color.fromRGBO(45, 58, 66, 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      margin: EdgeInsets.symmetric(vertical: 10),
+      child: TextFormField(
+        controller: noteConttroller,
+        style: TextStyle(color: Colors.white),
+        //initialValue: widget.todo != null ? widget.todo.note : '',
+        //key: ArchSampleKeys.noteField,
+        maxLines: null,
+        //style: textTheme.subhead,
+        decoration: InputDecoration(
+          icon: Icon(Icons.note, color: Colors.white),
+          //hintText: localizations.notesHint,
+          labelText: '노트',
+          labelStyle: TextStyle(color: Colors.white),
+        ),
+        //onSaved: (value) => _note = value,
+      )
+    );
+  }
+
   Widget get _formView {
     return Form(
       child: Padding(
@@ -254,6 +298,7 @@ class _DetailApp extends State<DetailApp> {
                 _todoTitleRow,
                 _completeDateRow,
                 _categoryRow,
+                _noteRowView,
               ],
             ),
             MaterialButton(
