@@ -36,6 +36,8 @@ dependencies:
   shared_preferences:
   flutter_datetime_picker: ^1.2.1
   intl: ^0.15.8
+  percent_indicator: "^2.1.0"
+  flutter_local_notifications:
   #simple_permissions:
 
 dev_dependencies:
