@@ -181,7 +181,7 @@ class SigninApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    signinBloc = 
+    //signinBloc = 
 
     return Scaffold(
       backgroundColor: Color.fromRGBO(49, 58, 67, 1),
