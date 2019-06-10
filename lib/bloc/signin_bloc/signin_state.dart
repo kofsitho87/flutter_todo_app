@@ -7,11 +7,13 @@ abstract class SigninState extends Equatable {
 }
   
 class LoadingSignin extends SigninState {
-
+  @override
+  String toString() => "LoadingSignin";
 }
 
 class NotSignin extends SigninState {
-  
+  @override
+  String toString() => "NotSignin";
 }
 
 class SuccessSignin extends SigninState {
@@ -25,5 +27,19 @@ class FailSignin extends SigninState {
   FailSignin({@required this.error}) : super([error]);
 
   @override
-  String toString() => "Not Signined => ${error}";
+  String toString() => "FailSignin => ${error}";
+}
+
+class SuccessSignup extends SigninState {
+  @override
+  String toString() => "SuccessSignup";
+}
+
+class FailSignup extends SigninState {
+  final String error;
+
+  FailSignup({@required this.error}) : super([error]);
+
+  @override
+  String toString() => "FailSignup => ${error}";
 }

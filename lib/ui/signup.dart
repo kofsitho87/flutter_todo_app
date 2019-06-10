@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/auth_bloc/bloc.dart';
+import '../bloc/blocs.dart';
 
 class SignupApp extends StatefulWidget {
 
@@ -10,15 +10,69 @@ class SignupApp extends StatefulWidget {
 }
 
 class SignupPageState extends State<SignupApp> {
-  final emailController = TextEditingController(text: 's1@s.com');
-  final userNameController = TextEditingController(text: 's1 name');
-  final pwController = TextEditingController(text: '123456');
-  final rePwController = TextEditingController(text: '123456');
+  final emailController = TextEditingController(text: '');
+  final userNameController = TextEditingController(text: '');
+  final pwController = TextEditingController(text: '');
+  final rePwController = TextEditingController(text: '');
 
-  AuthBloc authBloc;
+  SigninBloc signinBloc;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  var emailValid = false;
+  var userNameValid = false;
+  var pwValid = false;
+
+  @override
+  void initState() {
+    
+    signinBloc = BlocProvider.of<SigninBloc>(context);
+    emailController.addListener(_onEmailChanged);
+    userNameController.addListener(_onUserNameChanged);
+    pwController.addListener(_onPwChanged);
+
+    super.initState();
+  }
+
+  void _onEmailChanged(){
+    setState(() {
+      emailValid = RegExp(r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$').hasMatch(emailController.text);
+    });
+  }
+  void _onUserNameChanged(){
+    setState(() {
+      //pwValid = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$').hasMatch(pwController.text);
+      userNameValid = userNameController.text.length > 2;
+    });
+  }
+  void _onPwChanged(){
+    setState(() {
+      //pwValid = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$').hasMatch(pwController.text);
+      pwValid = pwController.text.length > 5;
+    });
+  }
+
+  void _showErrorMsg(){
+    var text = '';
+    if( !emailValid ){
+      text = '이메일을 입력해주세요!';
+    }else if( !userNameValid ){
+      text = '유저이름을 입력해주세요!';
+    }else if( !pwValid ){
+      text = '비밀번호를 입력해주세요!';
+    }
+
+    final snackBar = SnackBar(
+      content: Text(text),
+      backgroundColor: Colors.redAccent,
+      duration: Duration(seconds: 1),
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
+  }
 
   void _signUpAction(){
     //authBloc.dispatch(SignUpEvent(emailController.text, userNameController.text, pwController.text));
+
+    signinBloc.dispatch( AttemptSignupEvent(emailController.text, userNameController.text, pwController.text) );
   }
 
   Widget get _emailFormRowView {
@@ -81,6 +135,7 @@ class SignupPageState extends State<SignupApp> {
       ),
       child: TextFormField(
         controller: pwController,
+        obscureText: true,
         textInputAction: TextInputAction.next,
         style: TextStyle(color: Colors.white),
         keyboardAppearance: Brightness.dark,
@@ -106,6 +161,7 @@ class SignupPageState extends State<SignupApp> {
       ),
       child: TextFormField(
         controller: rePwController,
+        obscureText: true,
         textInputAction: TextInputAction.next,
         style: TextStyle(color: Colors.white),
         keyboardAppearance: Brightness.dark,
@@ -121,37 +177,86 @@ class SignupPageState extends State<SignupApp> {
     );
   }
 
+  Widget get _formView {
+    return Form(
+      child: Column(
+        children: <Widget>[
+          //SizedBox(height: 100),
+          _emailFormRowView,
+          _userNameFormRowView,
+          _passwordFormRowView,
+          _rePasswordFormRowView,
+          SizedBox(height: 20),
+          MaterialButton(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            elevation: 0.1,
+            minWidth: double.infinity,
+            padding: EdgeInsets.all(16),
+            color: Colors.lightGreen,
+            child: Text('회원가입', style: TextStyle(color: Colors.white, fontSize: 20)),
+            onPressed: (emailValid && userNameValid && pwValid) ? _signUpAction : _showErrorMsg,
+          ),
+          SizedBox(height: 20),
+          MaterialButton(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            elevation: 0.1,
+            minWidth: double.infinity,
+            padding: EdgeInsets.all(16),
+            color: Colors.white,
+            child: Text('로그인', style: TextStyle(fontSize: 20)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget get bodyView {
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: _formView,
+    );
+  }
+
+  Widget get loadingView{
+    return Positioned.fill(
+      child: Container(
+        color: Colors.transparent,
+        child: Align(
+          alignment: Alignment.center,
+          child: CircularProgressIndicator(),
+        )
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    authBloc = BlocProvider.of<AuthBloc>(context);
+    
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('회원가입'),
-      ),
+      key: _scaffoldKey,
+      // appBar: AppBar(
+      //   title: Text('회원가입'),
+      // ),
       backgroundColor: Color.fromRGBO(49, 58, 67, 1),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Form(
-          child: Column(
-            children: <Widget>[
-              SizedBox(height: 100),
-              _emailFormRowView,
-              _userNameFormRowView,
-              _passwordFormRowView,
-              _rePasswordFormRowView,
-              SizedBox(height: 20),
-              MaterialButton(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                elevation: 0.1,
-                minWidth: double.infinity,
-                padding: EdgeInsets.all(16),
-                color: Colors.lightGreen,
-                child: Text('회원가입', style: TextStyle(color: Colors.white)),
-                onPressed: _signUpAction,
-              )
-            ],
-          ),
+      body: Center(
+        child: BlocBuilder(
+          bloc: signinBloc,
+          builder: (BuildContext context, SigninState state) {
+            if( state is LoadingSignin ){
+              return Stack(
+                children: <Widget>[
+                  bodyView,
+                  loadingView
+                ],
+              );
+            }
+            
+            return bodyView;
+          },
         ),
       ),
     );

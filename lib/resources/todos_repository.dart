@@ -33,22 +33,24 @@ class TodosRepository {
     return _todos;
   }
 
-  Future<bool> addTodo(todo) async {
+  Future<String> addTodo(todo) async {
     if(this._user == null) {
       this._user = await FirebaseAuth.instance.currentUser();
     }
     final DocumentReference doc =  Firestore.instance.collection("USERS").document(_user.uid).collection('Todos').document();
-    var result = false;
+    
+    var todoId;
+
     await doc
     .setData(todo)
     .whenComplete(() {
       print('Document Added');
-      result = true;
+      todoId = doc.documentID;
     }).catchError((e) {
       print(e);
     });
 
-    return result;
+    return todoId;
   }
 
   Future<bool> deleteTodo(Todo todo) async {

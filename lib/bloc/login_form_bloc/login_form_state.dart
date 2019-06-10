@@ -56,8 +56,8 @@ class LoginFormState extends Equatable {
 
 class InitialLoginFormState extends LoginFormState {
   String email = '';
-  bool isEmailValid = true;
+  bool isEmailValid = false;
   String password = '';
-  bool isPasswordValid = true;
+  bool isPasswordValid = false;
   bool formSubmittedSuccessfully = false;
 }

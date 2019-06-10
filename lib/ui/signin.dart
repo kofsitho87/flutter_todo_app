@@ -1,45 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_study_app/bloc/signin_bloc/signin_bloc.dart';
+import 'package:bloc/bloc.dart';
 
-import 'package:modal_progress_hud/modal_progress_hud.dart';
-import '../bloc/login_form_bloc/bloc.dart';
 
-//import '../bloc/auth_bloc/bloc.dart';
 import '../bloc/blocs.dart';
-
 import '../routes/index.dart';
 
-import '../resources/auth_repository.dart';
-import '../resources/file_stroage.dart';
-import 'package:path_provider/path_provider.dart';
 
-// class SigninApp extends StatefulWidget {
-//   @override
-//   State<StatefulWidget> createState() => _SigninApp();
-// }
+class SigninApp extends StatefulWidget{
+
+  @override
+  State<StatefulWidget> createState() => _SigninApp();
+}
 
 
 
-class SigninApp extends StatelessWidget {
-  //final LoginFormBloc _loginFormBloc = LoginFormBloc();
-  final emailController = TextEditingController(text: 's@s.com');
-  final pwController = TextEditingController(text: '123456');
-
-  AuthBloc authBloc;
+class _SigninApp extends State<SigninApp> {
   SigninBloc signinBloc;
-  BuildContext context;
 
-  // @override
-  // void initState(){
-  //   emailController.addListener(_onEmailChanged);
-  // }
+  final emailController = TextEditingController();
+  final pwController = TextEditingController();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  // }
+  var emailValid = false;
+  var pwValid = false;
+
+  @override
+  void initState(){
+
+    signinBloc = BlocProvider.of<SigninBloc>(context);
+
+    //signinBloc.onError(error, stacktrace);
+    
+
+    emailController.addListener(_onEmailChanged);
+    pwController.addListener(_onPwChanged);
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    //signinBloc.dispose();
+
+    super.dispose();
+  }
+
+  void siginInAction(){
+    //authBloc.dispatch(LoginEvent(emailController.text, pwController.text));
+    signinBloc.dispatch( AttemptSigninEvent(emailController.text, pwController.text) );
+  }
+
+  void googleSigninAction(){
+    signinBloc.dispatch( AttemptGoogleSigninEvent() );
+  }
+
+  void _onEmailChanged(){
+    setState(() {
+      emailValid = RegExp(r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$').hasMatch(emailController.text);
+    });
+    //_loginFormBloc.dispatch(EmailChanged(email: emailController.text)); 
+  }
+
+  void _onPwChanged(){
+    setState(() {
+      //pwValid = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$').hasMatch(pwController.text);
+      pwValid = pwController.text.length > 5;
+    });
+    //_loginFormBloc.dispatch(PasswordChanged(password: pwController.text));
+  }
 
   Widget get _logoView {
     return Column(
@@ -52,7 +83,7 @@ class SigninApp extends StatelessWidget {
   }
 
   Widget _textFormField(int type) {
-    final focus = FocusNode();
+    //final focus = FocusNode();
     var _labelText = type == 1 ? 'Email' : 'Password';
     var _icon = type == 1 ? Icons.email : Icons.security;
 
@@ -60,9 +91,11 @@ class SigninApp extends StatelessWidget {
       controller: type == 1 ? emailController : pwController,
       //focusNode: focus,
       //textInputAction: TextInputAction.next,
+      obscureText: type == 2,
+      autocorrect: false,
       style: TextStyle(color: Colors.white),
       keyboardAppearance: Brightness.dark,
-      keyboardType: TextInputType.emailAddress,
+      keyboardType: type == 1 ? TextInputType.emailAddress : TextInputType.text,
       // onFieldSubmitted: (v) {
       //   //FocusScope.of(context).requestFocus(focus);
       // },
@@ -110,8 +143,15 @@ class SigninApp extends StatelessWidget {
               minWidth: double.infinity,
               padding: EdgeInsets.all(16),
               color: Colors.white,
-              //onPressed: state.isFormValid ? siginInAction : () => {},
-              onPressed: siginInAction,
+              onPressed: (emailValid && pwValid) ? siginInAction : () {
+                final snackBar = SnackBar(
+                  content: Text('이메일과 비밀번호를 입력해주세요!'),
+                  backgroundColor: Colors.redAccent,
+                  duration: Duration(seconds: 1),
+                );
+                _scaffoldKey.currentState.showSnackBar(snackBar);
+              },
+              //onPressed: siginInAction,
               child: Text('로그인', 
                 style: TextStyle(
                   fontSize: 20
@@ -142,30 +182,15 @@ class SigninApp extends StatelessWidget {
     );
   }
 
-  void siginInAction(){
-    //authBloc.dispatch(LoginEvent(emailController.text, pwController.text));
-    signinBloc.dispatch( AttemptSigninEvent(emailController.text, pwController.text) );
-  }
-
-  void _onEmailChanged(){
-    //_loginFormBloc.dispatch(EmailChanged(email: emailController.text));
-  }
-
-  Widget get bodyView {
-    return SingleChildScrollView(
-      child: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _logoView,
-            SizedBox(height: 50),
-            _loginFormView(),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget get _loginFormBlocView {
+  //   return BlocBuilder(
+  //     bloc: _loginFormBloc,
+  //     builder: (BuildContext context, LoginFormState state) {
+  //       print('LoginFormState $state');
+  //       return _loginFormView(state);
+  //     },
+  //   );
+  // }
 
   Widget get loadingView{
     return Positioned.fill(
@@ -179,30 +204,110 @@ class SigninApp extends StatelessWidget {
     );
   }
 
+  Widget get socialLoginButtonsView {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Expanded(
+            child: MaterialButton(
+              onPressed: googleSigninAction,
+              minWidth: double.infinity,
+              height: 60,
+              color: Color.fromRGBO(220, 77, 65, 1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Icon(FontAwesomeIcons.googlePlusG, color: Colors.white),
+                  SizedBox(width: 15,),
+                  Text('구글 로그인', style: TextStyle(color: Colors.white, fontSize: 20)),
+                ],
+              ),
+            ),
+          ),
+          // SizedBox(width: 10),
+          // Expanded(
+          //   child: MaterialButton(
+          //     onPressed: () => {},
+          //     minWidth: double.infinity,
+          //     height: 50,
+          //     color: Color.fromRGBO(220, 77, 65, 1),
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       mainAxisSize: MainAxisSize.max,
+          //       children: <Widget>[
+          //         Icon(FontAwesomeIcons.googlePlusG, color: Colors.white),
+          //         SizedBox(width: 15,),
+          //         Text('구글 로그인', style: TextStyle(color: Colors.white, fontSize: 20)),
+          //       ],
+          //     ),
+          //   ),
+          // )
+        ],
+      ),
+    );
+  }
+
+  Widget get bodyView {
+    return SingleChildScrollView(
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _logoView,
+            SizedBox(height: 50),
+            _loginFormView(),
+            SizedBox(height: 30),
+            socialLoginButtonsView,
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showError(String message){
+    final snackBar = SnackBar(
+      content: Text(message), 
+      backgroundColor: Colors.red
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
+  }
+
   @override
   Widget build(BuildContext context) {
-    //signinBloc = 
-
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Color.fromRGBO(49, 58, 67, 1),
-      body: Center(
-        child: BlocBuilder(
-          bloc: signinBloc,
-          builder: (BuildContext context, SigninState state) {  
-            this.context = context;
-
-            if( state is LoadingSignin ){
-              return Stack(
-                children: <Widget>[
-                  bodyView,
-                  loadingView
-                ],
-              );
-            }
-            return bodyView;
+      body: BlocListener(
+        bloc: signinBloc,
+        listener: (context, state){
+          if( state is FailSignin ){
+            _showError(state.error);
           }
-        )
-      ),
+        },
+        child: Center(
+          child: BlocBuilder(
+            bloc: signinBloc,
+            builder: (BuildContext context, SigninState state) {  
+              //this.context = context;
+              if( state is LoadingSignin ){
+                return Stack(
+                  children: <Widget>[
+                    bodyView,
+                    loadingView
+                  ],
+                );
+              }
+              
+              return bodyView;
+            }
+          )
+        ),
+      )
     );
   }
 }

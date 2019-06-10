@@ -16,8 +16,8 @@ import './ui/circle_progress.dart';
 
 void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
-  //runApp(Main());
-  runApp(CircleProgressUI());
+  runApp(Main());
+  //runApp(CircleProgressUI());
 }
 
 class Main extends StatelessWidget {
@@ -38,7 +38,6 @@ class Main extends StatelessWidget {
       bloc: authBloc,
       builder: (BuildContext context, AuthState state) {
         if(state is Autenticated) {
-          //print(state.user);
           return HomeApp(authBloc: authBloc);
         }else if (state is NotAutenticated){
           return AuthApp(authBloc: authBloc);

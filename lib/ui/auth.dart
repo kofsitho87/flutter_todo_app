@@ -7,6 +7,7 @@ import './signin.dart';
 import './signup.dart';
 
 import '../bloc/blocs.dart';
+
 import '../resources/auth_repository.dart';
 import '../resources/file_stroage.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,8 +15,6 @@ import 'package:path_provider/path_provider.dart';
 class AuthApp extends StatelessWidget {
   final AuthBloc authBloc;
   AuthApp({@required this.authBloc});
-
-  SigninBloc signinBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +25,7 @@ class AuthApp extends StatelessWidget {
         getApplicationDocumentsDirectory,
       )
     );
-    signinBloc = SigninBloc(authBloc: authBloc, authRepository: authRepository);
+    final signinBloc = SigninBloc(authBloc: authBloc, authRepository: authRepository);
 
     return BlocProvider(
       bloc: signinBloc,

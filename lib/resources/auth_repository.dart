@@ -3,21 +3,17 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../resources/file_stroage.dart';
 import '../models/models.dart';
 
 class AuthRepository {
   final FileStorage fileStorage;
-  FirebaseAuth _auth = FirebaseAuth.instance;
-
   AuthRepository({@required this.fileStorage});
 
-  //final authApiProvidr = AuthApiProvider();
-
-
-  //Future<User> loadUser() => authApiProvidr.loadUser();
-  //Future<User> login() => authApiProvidr.login();
+  GoogleSignIn _googleSignIn = GoogleSignIn();
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<User> loadUser() async {
     try {
@@ -68,9 +64,33 @@ class AuthRepository {
         "name": userName,
         "email": user.email
       };
-      Firestore.instance.collection("USERS").document(user.uid).setData(data);
+      await Firestore.instance.collection("USERS").document(user.uid).setData(data);
 
       return user;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<User> googleSignin() async {
+    try {
+      GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.getCredential(idToken: googleAuth.idToken);
+      final FirebaseUser user = await _auth.signInWithCredential(credential);
+
+      final userModel = User(user.uid, user.displayName, user.email, provider: SnsProvider.google);
+
+      final QuerySnapshot snapShot = await Firestore.instance.collection("USERS").where('uid', isEqualTo: user.uid).getDocuments();
+      if( snapShot.documents.length < 1 ) {
+        saveUserToFirebase(userModel);
+      }
+      
+      this.saveUser(userModel).then((file) {
+        print('파일 저장 성공!!! ${file.toString()}');
+      });
+
+      return userModel;
     } catch (e) {
       throw e;
     }
@@ -82,5 +102,9 @@ class AuthRepository {
     } catch (e) {
       throw e;
     }
+  }
+
+  saveUserToFirebase(User user) async {
+    return Firestore.instance.collection("USERS").document(user.uid).setData(user.toJson());
   }
 }

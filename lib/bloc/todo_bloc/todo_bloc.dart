@@ -46,9 +46,11 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
     try {
       final todos = (currentState as TodosLoaded).todos;
       yield TodosLoading();
-      final result = await this.todosRepository.addTodo(event.todo.toMap());
-      if(result) {
-        final List<Todo> updatedTodos = List.from(todos)..add(event.todo);
+      final String todoId = await this.todosRepository.addTodo(event.todo.toMap());
+      if(todoId != null) {
+        final todo = event.todo;
+        todo.id = todoId;
+        final List<Todo> updatedTodos = List.from(todos)..add(todo);
         yield TodosLoaded(
           updatedTodos
         );
