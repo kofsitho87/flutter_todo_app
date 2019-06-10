@@ -50,6 +50,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
+  easy_listview:
+    dependency: "direct main"
+    description:
+      name: easy_listview
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.3"
   equatable:
     dependency: "direct main"
     description:

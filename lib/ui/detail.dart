@@ -37,6 +37,7 @@ class _DetailApp extends State<DetailApp> {
   final String title;
   _DetailApp({@required this.title});
 
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   TodosBloc todosBloc;
 
   //String _todoTitle;
@@ -59,8 +60,8 @@ class _DetailApp extends State<DetailApp> {
     super.initState();
   }
 
-  void addTodo(String title, String category, DateTime completeDate) async {
-    final todo = Todo(title, category, completeDate: completeDate);
+  void addTodo(String title, String category, DateTime completeDate, String note) async {
+    final todo = Todo(title, category, completeDate: completeDate, note: note);
     await todosBloc.dispatch(AddTodo(todo));
     Navigator.of(context).pop();
     // setState(() {
@@ -94,18 +95,18 @@ class _DetailApp extends State<DetailApp> {
   void _saveTodoAction(){
     if( todoTitleController.text.length < 1 ){
       final snackBar = SnackBar(content: Text('할일을 입력해주세요!!'));
-      Scaffold.of(context).showSnackBar(snackBar);
+      _scaffoldKey.currentState.showSnackBar(snackBar);
       return;
     }else if ( _category == null ){
       final snackBar = SnackBar(content: Text('카테고리를 선택해주세요!!'));
-      Scaffold.of(context).showSnackBar(snackBar);
+      _scaffoldKey.currentState.showSnackBar(snackBar);
       return;
     }
     var completeDate = null;
     if(_completeDate != null){
       completeDate = _completeDate.add(Duration(hours: 23, minutes: 59, seconds: 59));
     }
-    this.addTodo(todoTitleController.text, _category, completeDate);
+    this.addTodo(todoTitleController.text, _category, completeDate, noteConttroller.text);
   }
 
   void _updateTodoAction(){
@@ -322,6 +323,7 @@ class _DetailApp extends State<DetailApp> {
       builder: (BuildContext context, TodosState state) {
         return ModalProgressHUD(
           child: Scaffold(
+            key: _scaffoldKey,
             backgroundColor: Theme.of(context).primaryColor,
             appBar: AppBar(
               elevation: 0,

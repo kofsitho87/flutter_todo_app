@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_listview/easy_listview.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 import '../routes/index.dart';
 import '../bloc/blocs.dart';
@@ -17,6 +19,7 @@ class TodoApp extends StatelessWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
+  BuildContext context;
   TodosBloc todosBloc;
   FilteredTodosBloc filteredTodosBloc;
 
@@ -165,8 +168,144 @@ class TodoApp extends StatelessWidget {
     return direction == DismissDirection.endToStart;
   }
 
+  Widget _listView(todos) {
+    return ListView.builder(
+      itemCount: todos.length,
+      itemBuilder: (context, index) {
+        final todo = todos[index];
+        return GestureDetector(
+          child: AnimatedOpacity(
+            key: Key(index.toString()),
+            opacity: todo.completed ? 0.4 : 1,
+            duration: Duration(milliseconds: 200),
+            child: TodoRowView(index, todo),
+          ),
+          onTapUp: (_) => _showTodoBottomSheet(todo, context),
+        );
+
+        // return Dismissible(
+        //   key: Key(index.toString()),
+        //   confirmDismiss: _confirmDismissAction,
+        //   direction: DismissDirection.endToStart,
+        //   background: Container(
+        //     margin: EdgeInsets.symmetric(vertical: 5),
+        //     padding: EdgeInsets.only(left: 20.0),
+        //     color: Colors.blue,
+        //     child: Align(
+        //       alignment: Alignment.centerLeft,
+        //       child: Icon(Icons.delete, color: Colors.white)
+        //     ),
+        //   ),
+        //   secondaryBackground: Container(
+        //     margin: EdgeInsets.symmetric(vertical: 5),
+        //     padding: EdgeInsets.only(right: 20.0),
+        //     color: Colors.red,
+        //     child: Align(
+        //       alignment: Alignment.centerRight,
+        //       child: Icon(Icons.delete, color: Colors.white)
+        //     ),
+        //   ),
+        //   onDismissed: (DismissDirection direction) {
+        //     if(direction == DismissDirection.endToStart){
+        //       deleteTodo(todo);
+        //     }
+        //   },
+        //   child: GestureDetector(
+        //     child: AnimatedOpacity(
+        //       key: Key(index.toString()),
+        //       opacity: todo.completed ? 0.4 : 1,
+        //       duration: Duration(milliseconds: 200),
+        //       child: TodoRowView(index, todo),
+        //     ),
+        //     onTapUp: (_) => _showTodoBottomSheet(todo, context),
+        //   ),
+        // );
+        
+      }
+    );
+  }
+
+  Widget get progressView{
+    return BlocBuilder(
+      bloc: todosBloc,
+      builder: (BuildContext context, TodosState state) {
+        var completePercent = 0.0;
+        if(state is TodosLoaded){
+          final completeTodos = state.todos.where((todo) => todo.completed).toList().length;
+          completePercent = completeTodos / state.todos.length;
+        }
+        return CircularPercentIndicator(
+          radius: 160.0,
+          lineWidth: 14.0,
+          percent: completePercent,
+          center: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("${(completePercent * 100).round()}%", style: TextStyle(fontSize: 30, color: Colors.white)),
+              SizedBox(height: 5),
+              Text('완료율', style: TextStyle(fontSize: 16, color: Colors.white))
+            ],
+          ),
+          progressColor: Theme.of(context).accentColor,
+          animation: true,
+          animationDuration: 400,
+          circularStrokeCap: CircularStrokeCap.round,
+        );
+      },
+    );
+    // return CircularPercentIndicator(
+    //   radius: 180.0,
+    //   lineWidth: 15.0,
+    //   percent: 0.5,
+    //   center: Text("100%", style: TextStyle(fontSize: 30, color: Colors.white)),
+    //   progressColor: Theme.of(context).accentColor,
+    //   //fillColor: Colors.redAccent,
+    //   //backgroundColor: Colors.transparent,
+    //   //header: Text('header'),
+    //   //footer: Text('footer'),
+    //   animation: true,
+    //   animationDuration: 600,
+    //   circularStrokeCap: CircularStrokeCap.round,
+    //   //linearGradient: LinearGradient(),
+    //   //arcType: ArcType.FULL
+    // );
+  }
+
+  Widget _easyListView(todos){
+    return EasyListView(
+      //headerSliverBuilder: (BuildContext context, ),   // SliverAppBar...etc.
+      headerBuilder: (BuildContext context){
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: 30,
+          ),
+          child: progressView,
+        );
+      },               // Header Widget Builder
+      //footerBuilder: footerBuilder,               // Footer Widget Builder 
+      itemCount: todos.length,
+      itemBuilder: (BuildContext context, index){
+        final todo = todos[index];
+        return GestureDetector(
+          child: AnimatedOpacity(
+            key: Key(index.toString()),
+            opacity: todo.completed ? 0.4 : 1,
+            duration: Duration(milliseconds: 200),
+            child: TodoRowView(index, todo),
+          ),
+          onTapUp: (_) => _showTodoBottomSheet(todo, context),
+        );
+      },                   // ItemBuilder with data index
+      //dividerBuilder: dividerBuilder,             // Custom Divider Builder
+      //loadMore: hasNextPage,                      // Load more flag
+      //onLoadMore: onLoadMoreEvent,                // Load more callback
+      //foregroundWidget: foregroundWidget,         // Widget witch overlap on ListView
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    this.context = context;
     todosBloc = BlocProvider.of<TodosBloc>(context);
     var userName = authBloc.currentState is Autenticated ? (authBloc.currentState as Autenticated).user.name : 'empty';
     userName = userName == null ? 'empty Name' : userName;
@@ -214,61 +353,7 @@ class TodoApp extends StatelessWidget {
                 todosBloc.dispatch(LoadTodos());
                 return null;
               },
-              child: ListView.builder(
-                itemCount: todos.length,
-                itemBuilder: (context, index) {
-                  final todo = todos[index];
-
-                  return GestureDetector(
-                    child: AnimatedOpacity(
-                      key: Key(index.toString()),
-                      opacity: todo.completed ? 0.4 : 1,
-                      duration: Duration(milliseconds: 200),
-                      child: TodoRowView(index, todo),
-                    ),
-                    onTapUp: (_) => _showTodoBottomSheet(todo, context),
-                  );
-
-                  // return Dismissible(
-                  //   key: Key(index.toString()),
-                  //   confirmDismiss: _confirmDismissAction,
-                  //   direction: DismissDirection.endToStart,
-                  //   background: Container(
-                  //     margin: EdgeInsets.symmetric(vertical: 5),
-                  //     padding: EdgeInsets.only(left: 20.0),
-                  //     color: Colors.blue,
-                  //     child: Align(
-                  //       alignment: Alignment.centerLeft,
-                  //       child: Icon(Icons.delete, color: Colors.white)
-                  //     ),
-                  //   ),
-                  //   secondaryBackground: Container(
-                  //     margin: EdgeInsets.symmetric(vertical: 5),
-                  //     padding: EdgeInsets.only(right: 20.0),
-                  //     color: Colors.red,
-                  //     child: Align(
-                  //       alignment: Alignment.centerRight,
-                  //       child: Icon(Icons.delete, color: Colors.white)
-                  //     ),
-                  //   ),
-                  //   onDismissed: (DismissDirection direction) {
-                  //     if(direction == DismissDirection.endToStart){
-                  //       deleteTodo(todo);
-                  //     }
-                  //   },
-                  //   child: GestureDetector(
-                  //     child: AnimatedOpacity(
-                  //       key: Key(index.toString()),
-                  //       opacity: todo.completed ? 0.4 : 1,
-                  //       duration: Duration(milliseconds: 200),
-                  //       child: TodoRowView(index, todo),
-                  //     ),
-                  //     onTapUp: (_) => _showTodoBottomSheet(todo, context),
-                  //   ),
-                  // );
-                  
-                }
-              ),
+              child: _easyListView(todos),
             );
           }
 

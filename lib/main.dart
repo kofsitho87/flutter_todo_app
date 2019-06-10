@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc/bloc.dart';
 import 'package:path_provider/path_provider.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 
 import './bloc/blocs.dart';
 import './resources/repository.dart';
@@ -12,12 +11,9 @@ import './resources/file_stroage.dart';
 import 'ui/auth.dart';
 import 'ui/home.dart';
 
-import './ui/circle_progress.dart';
-
 void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
   runApp(Main());
-  //runApp(CircleProgressUI());
 }
 
 class Main extends StatelessWidget {
