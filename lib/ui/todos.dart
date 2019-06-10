@@ -230,7 +230,7 @@ class TodoApp extends StatelessWidget {
       bloc: todosBloc,
       builder: (BuildContext context, TodosState state) {
         var completePercent = 0.0;
-        if(state is TodosLoaded){
+        if(state is TodosLoaded && state.todos.length > 1){
           final completeTodos = state.todos.where((todo) => todo.completed).toList().length;
           completePercent = completeTodos / state.todos.length;
         }
