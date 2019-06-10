@@ -11,7 +11,6 @@ import './detail.dart';
 
 class HomeApp extends StatefulWidget {
   final AuthBloc authBloc;
-
   HomeApp({@required this.authBloc});
 
   @override
@@ -43,11 +42,12 @@ class _HomeApp extends State<HomeApp> {
           headline: TextStyle(color: Colors.white),
         )
       ),
+      initialRoute: Routes.todos,
       routes: {
         Routes.todos: (context) {
           return TodoApp(onSignOut: () {
             widget.authBloc.dispatch(SignOutEvent());
-          });
+          }, authBloc: widget.authBloc);
         },
         Routes.addTodo: (context) {
           return DetailApp(title: 'Add Todo');
@@ -58,18 +58,7 @@ class _HomeApp extends State<HomeApp> {
   
   @override
   Widget build(BuildContext context) {
-  
     todosBloc.dispatch(LoadTodos());
-    
-
-    // return BlocProviderTree(
-    //   blocProviders: [
-    //     BlocProvider<TodosBloc>(bloc: todosBloc),
-    //     BlocProvider<FilteredTodosBloc>(bloc: filteredTodosBloc),
-    //   ],
-    //   child: appView,
-    // );
-
     return BlocProvider(
       bloc: todosBloc,
       child: appView,

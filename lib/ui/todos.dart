@@ -8,9 +8,11 @@ import '../models/models.dart';
 import '../ui/components/components.dart';
 import './detail.dart';
 
+
 class TodoApp extends StatelessWidget {
   final void Function() onSignOut;
-  TodoApp({@required this.onSignOut, Key key}) : super(key: key);
+  AuthBloc authBloc;
+  TodoApp({@required this.onSignOut, this.authBloc, Key key}) : super(key: key);
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
@@ -165,8 +167,9 @@ class TodoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     todosBloc = BlocProvider.of<TodosBloc>(context);
+    var userName = authBloc.currentState is Autenticated ? (authBloc.currentState as Autenticated).user.name : 'empty';
+    userName = userName == null ? 'empty Name' : userName;
     
     filteredTodosBloc = FilteredTodosBloc(
       todosBloc: todosBloc
@@ -178,8 +181,8 @@ class TodoApp extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         bottomOpacity: 0,
-        centerTitle: true,
-        title: Text('MyDashborad'),
+        //centerTitle: true,
+        title: Text(userName),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.filter_list),

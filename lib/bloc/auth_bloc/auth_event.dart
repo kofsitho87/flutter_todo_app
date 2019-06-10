@@ -26,3 +26,14 @@ class CheckAuthEvent extends AuthEvent {
   String toString() => 'CheckAuthEvent';
 }
 
+class SignUpEvent extends AuthEvent {
+  final String email;
+  final String userName;
+  final String password;
+
+  SignUpEvent(@required this.email, @required this.userName, @required this.password) : super([email, userName, password]);
+
+  @override
+  String toString() => 'SignUpEvent';
+}
+

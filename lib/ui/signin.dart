@@ -1,39 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
-
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_study_app/bloc/signin_bloc/signin_bloc.dart';
+
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import '../bloc/login_form_bloc/bloc.dart';
-import '../bloc/auth_bloc/bloc.dart';
 
-class LoginApp extends StatefulWidget {
-  final AuthBloc authBloc;
+//import '../bloc/auth_bloc/bloc.dart';
+import '../bloc/blocs.dart';
 
-  LoginApp({@required this.authBloc});
+import '../routes/index.dart';
 
-  @override
-  State<StatefulWidget> createState() => LoginPageState();
-}
+import '../resources/auth_repository.dart';
+import '../resources/file_stroage.dart';
+import 'package:path_provider/path_provider.dart';
+
+// class SigninApp extends StatefulWidget {
+//   @override
+//   State<StatefulWidget> createState() => _SigninApp();
+// }
 
 
 
-class LoginPageState extends State<LoginApp> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  final LoginFormBloc _loginFormBloc = LoginFormBloc();
+class SigninApp extends StatelessWidget {
+  //final LoginFormBloc _loginFormBloc = LoginFormBloc();
   final emailController = TextEditingController(text: 's@s.com');
   final pwController = TextEditingController(text: '123456');
 
-  @override
-  void initState(){
-    emailController.addListener(_onEmailChanged);
-  }
+  AuthBloc authBloc;
+  SigninBloc signinBloc;
+  BuildContext context;
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  // @override
+  // void initState(){
+  //   emailController.addListener(_onEmailChanged);
+  // }
+
+  // @override
+  // void dispose() {
+  //   super.dispose();
+  // }
 
   Widget get _logoView {
     return Column(
@@ -52,8 +58,8 @@ class LoginPageState extends State<LoginApp> {
 
     return TextFormField(
       controller: type == 1 ? emailController : pwController,
-      focusNode: focus,
-      textInputAction: TextInputAction.next,
+      //focusNode: focus,
+      //textInputAction: TextInputAction.next,
       style: TextStyle(color: Colors.white),
       keyboardAppearance: Brightness.dark,
       keyboardType: TextInputType.emailAddress,
@@ -74,7 +80,7 @@ class LoginPageState extends State<LoginApp> {
     );
   }
 
-  Widget _loginFormView(LoginFormState state){
+  Widget _loginFormView(){
     return Form(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -103,10 +109,9 @@ class LoginPageState extends State<LoginApp> {
               elevation: 0.4,
               minWidth: double.infinity,
               padding: EdgeInsets.all(16),
-              //height: 50,
               color: Colors.white,
-              //onPressed: () => Navigator.of(context).pushNamed('/signin'),
-              onPressed: state.isFormValid ? siginInAction : null,
+              //onPressed: state.isFormValid ? siginInAction : () => {},
+              onPressed: siginInAction,
               child: Text('로그인', 
                 style: TextStyle(
                   fontSize: 20
@@ -121,7 +126,9 @@ class LoginPageState extends State<LoginApp> {
               padding: EdgeInsets.all(16),
               //height: 50,
               color: Colors.lightGreen,
-              onPressed: () => {},
+              onPressed: () {
+                Navigator.pushNamed(context, Routes.signup);
+              },
               child: Text('회원가입', 
                 style: TextStyle(
                   fontSize: 20,
@@ -135,83 +142,66 @@ class LoginPageState extends State<LoginApp> {
     );
   }
 
-  Future<FirebaseUser> _handleSignIn(email, password) async {
-    try {
-      print(email);
-      return await _auth.signInWithEmailAndPassword(email: email, password: password);
-    } on PlatformException catch(e){
-      //print(e);
-      return null;
-    }
-    //return _auth.signInWithEmailAndPassword(email: email, password: password);
-  }
-
-  Future<FirebaseUser> _handleSignUp(email, password) async {
-    return _auth.createUserWithEmailAndPassword(email: email, password: password);
-    
-  }
-
-  void signUpAction(){
-    _handleSignUp(emailController.text, pwController.text)
-      .then((FirebaseUser user) {
-        print(user);
-        siginInAction();
-      })
-      .catchError((e) => print(e));
-  }
-
   void siginInAction(){
-    widget.authBloc.dispatch(LoginEvent(emailController.text, pwController.text));
+    //authBloc.dispatch(LoginEvent(emailController.text, pwController.text));
+    signinBloc.dispatch( AttemptSigninEvent(emailController.text, pwController.text) );
   }
 
   void _onEmailChanged(){
-    _loginFormBloc.dispatch(EmailChanged(email: emailController.text));
+    //_loginFormBloc.dispatch(EmailChanged(email: emailController.text));
   }
 
-  goToMainPage(){
-    Navigator.pushReplacementNamed(context, '/todos');
+  Widget get bodyView {
+    return SingleChildScrollView(
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _logoView,
+            SizedBox(height: 50),
+            _loginFormView(),
+          ],
+        ),
+      ),
+    );
   }
 
-  Widget blocBuilder(){
-    return BlocBuilder(
-      bloc: _loginFormBloc,
-      builder: (BuildContext context, LoginFormState state) {
-        return SingleChildScrollView(
-          child: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                _logoView,
-                SizedBox(height: 50),
-                _loginFormView(state),
-              ],
-            ),
-          ),
-        );
-      }
+  Widget get loadingView{
+    return Positioned.fill(
+      child: Container(
+        color: Colors.transparent,
+        child: Align(
+          alignment: Alignment.center,
+          child: CircularProgressIndicator(),
+        )
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.blueGrey[800],
-        accentColor: Colors.lightGreen,
-        primaryTextTheme: TextTheme(
-          title: TextStyle(color: Colors.white),
-          headline: TextStyle(color: Colors.white),
-        ),
-      ),
-      home: Scaffold(
-        backgroundColor: Color.fromRGBO(49, 58, 67, 1),
-        body: Center(
-          child: ModalProgressHUD(
-            child: blocBuilder(),
-            inAsyncCall: widget.authBloc.currentState is Autenticating
-          )
-        ),
+    signinBloc = 
+
+    return Scaffold(
+      backgroundColor: Color.fromRGBO(49, 58, 67, 1),
+      body: Center(
+        child: BlocBuilder(
+          bloc: signinBloc,
+          builder: (BuildContext context, SigninState state) {  
+            this.context = context;
+
+            if( state is LoadingSignin ){
+              return Stack(
+                children: <Widget>[
+                  bodyView,
+                  loadingView
+                ],
+              );
+            }
+            return bodyView;
+          }
+        )
       ),
     );
   }

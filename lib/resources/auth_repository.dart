@@ -7,11 +7,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../resources/file_stroage.dart';
 import '../models/models.dart';
 
-class Repository {
+class AuthRepository {
   final FileStorage fileStorage;
   FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Repository({@required this.fileStorage});
+  AuthRepository({@required this.fileStorage});
 
   //final authApiProvidr = AuthApiProvider();
 

@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../bloc/auth_bloc/bloc.dart';
 
 class SignupApp extends StatefulWidget {
-  final AuthBloc authBloc;
-
-  SignupApp({@required this.authBloc});
 
   @override
   State<StatefulWidget> createState() => SignupPageState();
 }
 
 class SignupPageState extends State<SignupApp> {
-  final emailController = TextEditingController(text: 's@s.com');
-  final userNameController = TextEditingController(text: 'user name');
+  final emailController = TextEditingController(text: 's1@s.com');
+  final userNameController = TextEditingController(text: 's1 name');
   final pwController = TextEditingController(text: '123456');
   final rePwController = TextEditingController(text: '123456');
+
+  AuthBloc authBloc;
+
+  void _signUpAction(){
+    //authBloc.dispatch(SignUpEvent(emailController.text, userNameController.text, pwController.text));
+  }
 
   Widget get _emailFormRowView {
     return Container(
@@ -26,7 +31,7 @@ class SignupPageState extends State<SignupApp> {
       ),
       child: TextFormField(
         controller: emailController,
-        textInputAction: TextInputAction.next,
+        //textInputAction: TextInputAction.next,
         style: TextStyle(color: Colors.white),
         keyboardAppearance: Brightness.dark,
         keyboardType: TextInputType.emailAddress,
@@ -118,41 +123,34 @@ class SignupPageState extends State<SignupApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.blueGrey[800],
-        accentColor: Colors.lightGreen,
-        primaryTextTheme: TextTheme(
-          title: TextStyle(color: Colors.white),
-          headline: TextStyle(color: Colors.white),
-        ),
+    authBloc = BlocProvider.of<AuthBloc>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('회원가입'),
       ),
-      home: Scaffold(
-        backgroundColor: Color.fromRGBO(49, 58, 67, 1),
-        body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Form(
-            child: Column(
-              children: <Widget>[
-                SizedBox(height: 100),
-                _emailFormRowView,
-                _userNameFormRowView,
-                _passwordFormRowView,
-                _rePasswordFormRowView,
-                SizedBox(height: 20),
-                MaterialButton(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0.1,
-                  minWidth: double.infinity,
-                  padding: EdgeInsets.all(16),
-                  color: Colors.lightGreen,
-                  child: Text('회원가입', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    //widget.authBloc.dispatch(Sign);
-                  },
-                )
-              ],
-            ),
+      backgroundColor: Color.fromRGBO(49, 58, 67, 1),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Form(
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 100),
+              _emailFormRowView,
+              _userNameFormRowView,
+              _passwordFormRowView,
+              _rePasswordFormRowView,
+              SizedBox(height: 20),
+              MaterialButton(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0.1,
+                minWidth: double.infinity,
+                padding: EdgeInsets.all(16),
+                color: Colors.lightGreen,
+                child: Text('회원가입', style: TextStyle(color: Colors.white)),
+                onPressed: _signUpAction,
+              )
+            ],
           ),
         ),
       ),

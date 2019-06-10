@@ -30,5 +30,3 @@ class NotAutenticated extends AuthState {
   @override
   String toString() => "Not Signined => ${error}";
 }
-
-class InitialAuthState extends AuthState {}

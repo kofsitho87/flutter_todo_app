@@ -5,25 +5,28 @@ import 'package:meta/meta.dart';
 class User extends Equatable {
   String uid;
   String name;
+  String email;
 
-  User(this.uid, this.name);
+  User(this.uid, this.name, this.email);
 
   static User fromJson(Map<String, Object> json) {
     return User(
       json["uid"] as String,
       json["name"] as String,
+      json["email"] as String,
     );
   }
 
   Map<String, Object> toJson() {
     return {
       "uid": this.uid,
-      "name": this.name
+      "name": this.name,
+      "email": this.email
     };
   }
 
   @override
   String toString() {
-    return 'User { uid: $uid, name: $name }';
+    return 'User { uid: $uid, name: $name, email: $email }';
   }
 }
